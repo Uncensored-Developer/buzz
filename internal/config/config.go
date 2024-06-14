@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Host string `yaml:"host" env:"HTTP_HOST"`
-	Port string `yaml:"port" env:"HTTP_PORT"`
+	Host  string `yaml:"host" env:"HTTP_HOST"`
+	Port  string `yaml:"port" env:"HTTP_PORT"`
+	Debug bool   `yaml:"debug" env:"DEBUG"`
 }
 
 func LoadConfig() (*Config, error) {

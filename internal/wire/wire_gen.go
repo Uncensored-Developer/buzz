@@ -8,6 +8,7 @@ package wire
 
 import (
 	"github.com/Uncensored-Developer/buzz/internal/config"
+	"github.com/Uncensored-Developer/buzz/internal/logger"
 	"github.com/Uncensored-Developer/buzz/internal/server"
 )
 
@@ -18,6 +19,7 @@ func InitializeServer() (*server.Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	serverServer := server.NewServer(configConfig)
+	zapLogger := logger.NewLogger(configConfig)
+	serverServer := server.NewServer(configConfig, zapLogger)
 	return serverServer, nil
 }

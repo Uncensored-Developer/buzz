@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Uncensored-Developer/buzz/internal/config"
-	"log"
+	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"os"
@@ -14,11 +14,12 @@ import (
 )
 
 type Server struct {
+	logger *zap.Logger
 	config *config.Config
 }
 
-func NewServer(cfg *config.Config) *Server {
-	return &Server{config: cfg}
+func NewServer(cfg *config.Config, logger *zap.Logger) *Server {
+	return &Server{config: cfg, logger: logger}
 }
 
 func (s *Server) setupHandler() http.Handler {
@@ -38,7 +39,9 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 
 	go func() {
-		log.Printf("Listening on %s\n", httpServer.Addr)
+		logMsg := fmt.Sprintf("Listening on %s", httpServer.Addr)
+		s.logger.Info(logMsg)
+		//log.Printf("Listening on %s\n", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 		}
