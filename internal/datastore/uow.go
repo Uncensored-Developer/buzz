@@ -7,6 +7,9 @@ import (
 	"github.com/uptrace/bun"
 )
 
+// IUnitOfWorkDatastore is an interface that represents a unit of work for a data store.
+// It provides access to all data stores in a Unit-Of-Work.
+// All data changes done will be executed in a database transaction
 type IUnitOfWorkDatastore interface {
 	UsersRepository() data.IUserRepository
 }

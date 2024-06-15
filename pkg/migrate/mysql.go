@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
+	"github.com/Uncensored-Developer/buzz/pkg/utils"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/mysql"
+	"github.com/golang-migrate/migrate/v4/database/mysql" // Load driver to read migrations from the file system.
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/pkg/errors"
 	"path/filepath"
 	"runtime"
@@ -17,7 +19,12 @@ import (
 // The source path is determined by the project's root directory relative to the caller's file location.
 // The database driver is set as MySQL.
 // If any errors occur during the process, they will be returned.
-func Up(dsn, migrationsSource string) error {
+func Up(dbURL, migrationsSource string) error {
+	dsn, err := utils.ConvertDatabaseUrlToDSN(dbURL)
+	if err != nil {
+		return err
+	}
+
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return errors.Wrap(err, "could not open database connection")
