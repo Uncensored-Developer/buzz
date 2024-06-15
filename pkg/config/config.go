@@ -3,8 +3,8 @@ package config
 import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/pkg/errors"
-	"log"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -18,10 +18,11 @@ func LoadConfig() (*Config, error) {
 
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "could not get current dir")
 	}
+	parentTop := filepath.Dir(dir)
 
-	err = cleanenv.ReadConfig(dir+"/config.yaml", cfg)
+	err = cleanenv.ReadConfig(parentTop+"/config/config.yaml", cfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not read config")
 	}

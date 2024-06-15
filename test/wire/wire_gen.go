@@ -7,19 +7,23 @@
 package wire
 
 import (
-	"github.com/Uncensored-Developer/buzz/internal/server"
+	"context"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/logger"
+	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 )
 
 // Injectors from wire.go:
 
-func InitializeServer() (*server.Server, error) {
+func InitializeTestDatabase(ctx context.Context) (*testcontainer.TestDatabase, error) {
 	configConfig, err := config.LoadConfig()
 	if err != nil {
 		return nil, err
 	}
 	zapLogger := logger.NewLogger(configConfig)
-	serverServer := server.NewServer(configConfig, zapLogger)
-	return serverServer, nil
+	testDatabase, err := testcontainer.NewTestDatabase(ctx, zapLogger)
+	if err != nil {
+		return nil, err
+	}
+	return testDatabase, nil
 }

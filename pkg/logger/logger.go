@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/Uncensored-Developer/buzz/internal/config"
+	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Uncensored-Developer/buzz/internal/config"
+	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"go.uber.org/zap"
 	"net"
 	"net/http"

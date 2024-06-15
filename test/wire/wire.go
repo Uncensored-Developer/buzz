@@ -4,15 +4,16 @@
 package wire
 
 import (
-	"github.com/Uncensored-Developer/buzz/internal/server"
+	"context"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/logger"
+	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/google/wire"
 )
 
-func InitializeServer() (*server.Server, error) {
+func InitializeTestDatabase(ctx context.Context) (*testcontainer.TestDatabase, error) {
 	panic(wire.Build(
-		server.NewServer,
+		testcontainer.NewTestDatabase,
 		config.LoadConfig,
 		logger.NewLogger,
 	))
