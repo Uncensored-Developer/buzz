@@ -26,6 +26,13 @@ var globalConfig *config.Config
 var globalTestDatabase *testcontainer.TestDatabase
 var globalDb *bun.DB
 
+// init initializes some dependencies before running the tests
+// 1. Loads the configuration using config.LoadConfig.
+// 2. Creates a global logger using logger.NewLogger.
+// 3. Starts a test database using testcontainer.NewTestDatabase.
+// 4. Connects to the test database using db.Connect.
+// 5. Runs migrations using migrate.Up.
+// It is called automatically when the package is initialized.
 func init() {
 	ctx := context.Background()
 	cfg, err := config.LoadConfig()
