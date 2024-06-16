@@ -1,0 +1,42 @@
+name: "buzz-services"
+
+services:
+  mysql_db:
+    image: mysql:8.4
+    restart: on-failure
+    pull_policy: if_not_present
+    environment:
+      MYSQL_DATABASE: "buzz"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - type: volume
+        source: db-data
+        target: /mysql
+
+  buzz_api:
+    container_name: buzz_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    depends_on:
+      - mysql_db
+    environment:
+      - HTTP_HOST=0.0.0.0
+      - HTTP_PORT=8003
+      - DEBUG=true
+      - DATABASE_URL=mysql://user:password@0.0.0.0:3306/buzz
+      - JWT_KEY=wTkjqFUqqDpUGinAJqHZ
+      - PASSWORD_HASHER_SALT=wTkjqFUqqDpUGinAJqHZ
+      - FAKE_USER_PASSWORD=password123
+
+
+volumes:
+  db-data:
