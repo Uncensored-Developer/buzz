@@ -14,3 +14,15 @@ type IUserRepository interface {
 func NewUserRepository(db bun.IDB) IUserRepository {
 	return bun_mysql.NewBunRepository[models.User](db)
 }
+
+func UserWithEmail(email string) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("email = ?", email)
+	}
+}
+
+func UserWithID(id int) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("id = ?", id)
+	}
+}
