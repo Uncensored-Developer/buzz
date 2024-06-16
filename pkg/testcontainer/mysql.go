@@ -69,5 +69,9 @@ func NewTestDatabase(ctx context.Context, logger *zap.Logger) (*TestDatabase, er
 }
 
 func (t *TestDatabase) Shutdown() error {
-	return t.container.Terminate(t.ctx)
+	err := t.container.Terminate(t.ctx)
+	if err == nil {
+		t.logger.Info("MYSQL test database container shutdown successfully.")
+	}
+	return err
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/db"
-	"github.com/Uncensored-Developer/buzz/test/wire"
+	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uptrace/bun"
@@ -19,7 +19,7 @@ type testUser struct {
 
 func TestBunRepository(t *testing.T) {
 	ctx := context.Background()
-	testDb, err := wire.InitializeTestDatabase(ctx)
+	testDb, err := testcontainer.InitializeTestDatabase(ctx)
 	require.NoError(t, err)
 	defer testDb.Shutdown()
 
