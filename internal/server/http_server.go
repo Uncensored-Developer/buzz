@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"go.uber.org/zap"
 	"net"
@@ -14,24 +15,32 @@ import (
 )
 
 type Server struct {
-	logger *zap.Logger
-	config *config.Config
+	logger      *zap.Logger
+	config      *config.Config
+	authService *features.AuthenticationService
 }
 
-func NewServer(cfg *config.Config, logger *zap.Logger) *Server {
-	return &Server{config: cfg, logger: logger}
+func NewServer(
+	cfg *config.Config,
+	logger *zap.Logger,
+	authService *features.AuthenticationService,
+) *Server {
+	return &Server{config: cfg, logger: logger, authService: authService}
 }
 
-func (s *Server) setupHandler() http.Handler {
+func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	mux := http.NewServeMux()
 	var handler http.Handler = mux
 
 	// Middleware
+
+	// routes
+	addRoutes(ctx, mux, s.config, s.logger, s.authService)
 	return handler
 }
 
 func (s *Server) Run(ctx context.Context) error {
-	srv := s.setupHandler()
+	srv := s.setupHandler(ctx)
 
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(s.config.Host, s.config.Port),

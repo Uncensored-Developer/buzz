@@ -1,4 +1,4 @@
-package server
+package dto
 
 import (
 	"context"
@@ -12,7 +12,7 @@ type IRequestValidator interface {
 	Valid(ctx context.Context) (problems map[string]string)
 }
 
-func decodeValid[T IRequestValidator](r *http.Request) (T, map[string]string, error) {
+func DecodeValid[T IRequestValidator](r *http.Request) (T, map[string]string, error) {
 	var v T
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
 		return v, nil, errors.Wrap(err, "decode json failed")
@@ -23,7 +23,7 @@ func decodeValid[T IRequestValidator](r *http.Request) (T, map[string]string, er
 	return v, nil, nil
 }
 
-func encode[T any](w http.ResponseWriter, r *http.Request, status int, v T) error {
+func Encode[T any](w http.ResponseWriter, r *http.Request, status int, v T) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
