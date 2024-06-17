@@ -1,5 +1,5 @@
 package dto
 
-type ErrorResponse struct {
-	Error string `json:"error"`
+type ErrorResponse[T string | map[string]string] struct {
+	Error T `json:"error"`
 }

@@ -17,5 +17,6 @@ func addRoutes(
 	authService *features.AuthenticationService,
 ) {
 	mux.Handle("/user/create", delivery.HandleUserCreate(ctx, logger, cfg, authService))
+	mux.Handle("/login", delivery.HandleUserLogin(ctx, logger, cfg, authService))
 	mux.Handle("/health", HandleHealthCheck(logger))
 }
