@@ -16,7 +16,7 @@ func InitializeServer() (*Server, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "load config failed")
 	}
-	zapLogger := logger.NewLogger(cfg)
+	zapLogger := logger.NewLogger()
 
 	// Start Initializing Authentication service dependencies
 	passwordHasher := hash.NewSHA1Hasher(cfg.PasswordHasherSalt)

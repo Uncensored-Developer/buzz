@@ -49,6 +49,7 @@ func HandleUserSignUp(
 			dob := gofakeit.PastDate()
 
 			user, err := authService.SignUp(ctx, dob, name, email, password, gender)
+
 			if err != nil {
 				errRes := dto.ErrorResponse{
 					Error: err.Error(),

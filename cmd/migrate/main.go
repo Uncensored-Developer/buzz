@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	zapLogger := logger.NewLogger(cfg)
+	zapLogger := logger.NewLogger()
 
 	err = migrate.Up(cfg.DatabaseURL, "db/migrations")
 	if err != nil {

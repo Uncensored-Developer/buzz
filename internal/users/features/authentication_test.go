@@ -41,7 +41,7 @@ func init() {
 		globalLogger.Fatal("Failed to load config")
 	}
 	globalConfig = cfg
-	globalLogger = logger.NewLogger(globalConfig)
+	globalLogger = logger.NewLogger()
 	dbInstance, err := testcontainer.NewTestDatabase(ctx, globalLogger)
 	if err != nil {
 		globalLogger.Fatal("Failed to start test database")
@@ -76,7 +76,7 @@ func TestAuthenticationService(t *testing.T) {
 	}
 }
 
-func (a *AuthenticationServiceTestSuite) SetupTest() {
+func (a *AuthenticationServiceTestSuite) SetupSuite() {
 	a.ctx = context.Background()
 	user := models.User{
 		Name:     "John Doe",
@@ -92,7 +92,7 @@ func (a *AuthenticationServiceTestSuite) SetupTest() {
 	}
 }
 
-func (a *AuthenticationServiceTestSuite) TearDownTest() {
+func (a *AuthenticationServiceTestSuite) TearDownSuite() {
 	_, err := globalDb.NewDelete().Model(&models.User{}).Where(
 		"email = ?", testUserEmail).Exec(a.ctx)
 	if err != nil {

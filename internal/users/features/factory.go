@@ -15,7 +15,7 @@ func InitializeAuthenticationService() (*AuthenticationService, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "load config failed")
 	}
-	zapLogger := logger.NewLogger(cfg)
+	zapLogger := logger.NewLogger()
 
 	passwordHasher := hash.NewSHA1Hasher(cfg.PasswordHasherSalt)
 	manager, err := authentication.NewManager(cfg.JwtKey)

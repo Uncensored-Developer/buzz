@@ -6,8 +6,8 @@ import (
 )
 
 type Config struct {
-	Host               string `env:"HTTP_HOST"`
-	Port               string `env:"HTTP_PORT"`
+	Host               string `env:"HTTP_HOST" env-default:"localhost"`
+	Port               string `env:"HTTP_PORT" env-default:"8010"`
 	Debug              bool   `env:"DEBUG" env-default:"true"`
 	DatabaseURL        string `env:"DATABASE_URL"`
 	JwtKey             string `env:"JWT_KEY" env-default:"fakeJwtkey"`
