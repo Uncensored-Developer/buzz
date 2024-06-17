@@ -13,6 +13,7 @@ import (
 )
 
 var ErrEmailTaken = errors.New("Email already taken")
+var ErrInvalidLoginCred = errors.New("Email or password incorrect")
 
 type AuthenticationService struct {
 	hasher       hash.IStringHasher
@@ -77,4 +78,21 @@ func (a *AuthenticationService) SignUp(
 		zap.Int64("id", user.ID),
 	)
 	return user, nil
+}
+
+func (a *AuthenticationService) Login(ctx context.Context, email, password string) (string, error) {
+	hashPassword, err := a.hasher.Hash(password)
+	if err != nil {
+		return "", errors.Wrap(err, "password hash failed")
+	}
+	user, err := a.userRepo.FindOne(ctx, data.UserWithEmailAndPassword(email, hashPassword))
+	if err != nil {
+		return "", ErrInvalidLoginCred
+	}
+	sixMonthsDuration := time.Hour * 24 * 30 * 6
+	token, err := a.tokenManager.NewToken(user.ID, sixMonthsDuration)
+	if err != nil {
+		return "", errors.Wrap(err, "token encoding failed")
+	}
+	return token, nil
 }

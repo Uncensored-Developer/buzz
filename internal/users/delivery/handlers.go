@@ -12,7 +12,9 @@ import (
 	"time"
 )
 
-func HandleUserSignUp(
+// HandleUserCreate handles the creation of a new user via an empty HTTP POST request.
+// It creates/sign's up a new user by generating random user profile information
+func HandleUserCreate(
 	ctx context.Context,
 	logger *zap.Logger,
 	cfg *config.Config,

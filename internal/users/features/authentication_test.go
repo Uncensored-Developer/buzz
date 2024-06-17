@@ -78,14 +78,22 @@ func TestAuthenticationService(t *testing.T) {
 
 func (a *AuthenticationServiceTestSuite) SetupSuite() {
 	a.ctx = context.Background()
+
+	pHasher := hash.NewSHA1Hasher(globalConfig.PasswordHasherSalt)
+	hashedPassword, err := pHasher.Hash(testUserPassword)
+	if err != nil {
+		globalLogger.Fatal("Error hashing test password",
+			zap.String("errMsg", err.Error()))
+	}
+
 	user := models.User{
 		Name:     "John Doe",
 		Email:    testUserEmail,
-		Password: testUserPassword,
+		Password: hashedPassword,
 		Gender:   "M",
 		Dob:      time.Now(),
 	}
-	_, err := globalDb.NewInsert().Model(&user).Exec(a.ctx)
+	_, err = globalDb.NewInsert().Model(&user).Exec(a.ctx)
 	if err != nil {
 		globalLogger.Fatal("error saving user for test setup",
 			zap.String("errMsg", err.Error()))
@@ -125,6 +133,44 @@ func (a *AuthenticationServiceTestSuite) TestSignUpWithCorrectDetails() {
 	a.Assert().Equal(name, user.Name)
 	a.Assert().Equal(gender, user.Gender)
 	a.Assert().NotEqual(testUserPassword, user.Password)
+}
+
+func (a *AuthenticationServiceTestSuite) TestLogin() {
+	authService, err := setupAuthenticationService()
+	a.Require().NoError(err)
+
+	testCases := map[string]struct {
+		email       string
+		password    string
+		expectError bool
+		expectedErr error
+	}{
+		"invalid credentials": {
+			email:       testUserEmail,
+			password:    "wrongPassword",
+			expectError: true,
+			expectedErr: features.ErrInvalidLoginCred,
+		},
+		"valid credentials": {
+			email:       testUserEmail,
+			password:    testUserPassword,
+			expectError: false,
+			expectedErr: nil,
+		},
+	}
+
+	for name, tc := range testCases {
+		a.T().Run(name, func(t *testing.T) {
+			token, err := authService.Login(a.ctx, tc.email, tc.password)
+			if tc.expectError {
+				a.Assert().ErrorIs(err, tc.expectedErr)
+				a.Assert().Empty(token) // Token must be empty
+			} else {
+				a.Assert().NoError(err)    // Error must be null
+				a.Assert().NotEmpty(token) // Token must be present
+			}
+		})
+	}
 }
 
 func setupAuthenticationService() (*features.AuthenticationService, error) {

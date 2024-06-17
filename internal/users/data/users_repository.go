@@ -26,3 +26,9 @@ func UserWithID(id int) repository.SelectCriteria {
 		return query.Where("id = ?", id)
 	}
 }
+
+func UserWithEmailAndPassword(email, password string) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("email = ?", email).Where("password = ?", password)
+	}
+}
