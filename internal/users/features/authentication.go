@@ -66,7 +66,7 @@ func (a *AuthenticationService) SignUp(
 	err = a.userRepo.Save(ctx, newUser)
 	if err != nil {
 		a.logger.Error("User save operation failed",
-			zap.String("email", email),
+			zap.Any("user", newUser),
 		)
 		return models.User{}, errors.Wrap(err, "user save failed")
 	}

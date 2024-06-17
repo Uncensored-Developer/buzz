@@ -8,7 +8,7 @@ import (
 type Config struct {
 	Host               string `env:"HTTP_HOST"`
 	Port               string `env:"HTTP_PORT"`
-	Debug              bool   `env:"DEBUG"`
+	Debug              bool   `env:"DEBUG" env-default:"true"`
 	DatabaseURL        string `env:"DATABASE_URL"`
 	JwtKey             string `env:"JWT_KEY" env-default:"fakeJwtkey"`
 	PasswordHasherSalt string `env:"PASSWORD_HASHER_SALT" env-default:"fakeHasherSalt"`

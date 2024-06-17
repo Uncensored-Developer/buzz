@@ -45,7 +45,6 @@ func Up(dbURL, migrationsSource string) error {
 		filepath.ToSlash(filepath.Dir(callerPath)),
 		filepath.ToSlash(migrationsSource),
 	)
-
 	migration, err := migrate.NewWithDatabaseInstance(sourceURL, testcontainer.DbName, driver)
 	if err != nil {
 		return err

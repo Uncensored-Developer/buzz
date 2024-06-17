@@ -12,6 +12,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/logger"
 	"github.com/Uncensored-Developer/buzz/pkg/migrate"
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"github.com/uptrace/bun"
@@ -108,6 +109,22 @@ func (a *AuthenticationServiceTestSuite) TestSignUpWithTakenEmail() {
 	dob := time.Now()
 	_, err = authService.SignUp(a.ctx, dob, name, testUserEmail, testUserPassword, gender)
 	a.Assert().ErrorIs(err, features.ErrEmailTaken)
+}
+
+func (a *AuthenticationServiceTestSuite) TestSignUpWithCorrectDetails() {
+	authService, err := setupAuthenticationService()
+	a.Require().NoError(err)
+
+	email := gofakeit.Email()
+	name := "John Doe"
+	gender := "M"
+	dob := gofakeit.PastDate()
+	user, err := authService.SignUp(a.ctx, dob, name, email, testUserPassword, gender)
+	a.Require().NoError(err)
+	a.Assert().Equal(email, user.Email)
+	a.Assert().Equal(name, user.Name)
+	a.Assert().Equal(gender, user.Gender)
+	a.Assert().NotEqual(testUserPassword, user.Password)
 }
 
 func setupAuthenticationService() (*features.AuthenticationService, error) {

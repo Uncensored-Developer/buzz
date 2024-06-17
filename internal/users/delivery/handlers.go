@@ -19,13 +19,6 @@ func HandleUserSignUp(
 	authService *features.AuthenticationService,
 ) http.Handler {
 
-	// generate random user details for signup
-	email := gofakeit.Email()
-	name := gofakeit.Name()
-	password := cfg.FakeUserPassword
-	gender := strings.ToUpper(string([]rune(gofakeit.Gender())[0]))
-	dob := gofakeit.PastDate()
-
 	type userResponse struct {
 		Id       int64  `json:"id"`
 		Email    string `json:"email"`
@@ -42,14 +35,25 @@ func HandleUserSignUp(
 
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+				return
+			}
 			logger.Info("Handling user signup")
+
+			// generate random user details for signup
+			email := gofakeit.Email()
+			name := gofakeit.Name()
+			password := cfg.FakeUserPassword
+			gender := strings.ToUpper(string([]rune(gofakeit.Gender())[0]))
+			dob := gofakeit.PastDate()
 
 			user, err := authService.SignUp(ctx, dob, name, email, password, gender)
 			if err != nil {
 				errRes := dto.ErrorResponse{
 					Error: err.Error(),
 				}
-				err := dto.Encode[dto.ErrorResponse](w, r, 500, errRes)
+				err := dto.Encode[dto.ErrorResponse](w, r, http.StatusInternalServerError, errRes)
 				if err != nil {
 					logger.Error("could not encode error response",
 						zap.Error(err))
