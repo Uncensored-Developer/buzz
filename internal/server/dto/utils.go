@@ -30,11 +30,16 @@ func Encode[T any](w http.ResponseWriter, status int, v T) error {
 
 // SendErrorJsonResponse sends a JSON error response with the given error message
 // or map of error messages to the http.ResponseWriter. It uses the Encode function to encode the error
-func SendErrorJsonResponse[T string | map[string]string](w http.ResponseWriter, logger *zap.Logger, resErr T) {
+func SendErrorJsonResponse[T string | map[string]string](
+	w http.ResponseWriter,
+	logger *zap.Logger,
+	resErr T,
+	status int,
+) {
 	errObj := ErrorResponse[T]{
 		Error: resErr,
 	}
-	err := Encode[ErrorResponse[T]](w, http.StatusBadRequest, errObj)
+	err := Encode[ErrorResponse[T]](w, status, errObj)
 	if err != nil {
 		logger.Error("could not encode error response",
 			zap.Error(err))

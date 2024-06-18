@@ -53,7 +53,7 @@ func HandleUserCreate(
 
 			user, err := authService.SignUp(ctx, dob, name, email, password, gender)
 			if err != nil {
-				dto.SendErrorJsonResponse(w, logger, err.Error())
+				dto.SendErrorJsonResponse(w, logger, err.Error(), http.StatusBadRequest)
 			} else {
 				age := time.Now().Year() - user.Dob.Year()
 				res := response{
@@ -102,7 +102,7 @@ func HandleUserLogin(
 
 			loginInput, err := dto.DecodeValid[request](r)
 			if err != nil {
-				dto.SendErrorJsonResponse(w, logger, "Invalid request body format")
+				dto.SendErrorJsonResponse(w, logger, "Invalid request body format", http.StatusBadRequest)
 				return
 			}
 
@@ -117,13 +117,13 @@ func HandleUserLogin(
 				for name, err := range validationErrs {
 					errMsgs[name] = err.Error()
 				}
-				dto.SendErrorJsonResponse(w, logger, errMsgs)
+				dto.SendErrorJsonResponse(w, logger, errMsgs, http.StatusBadRequest)
 				return
 			}
 
 			token, err := authService.Login(ctx, loginInput.Email, loginInput.Password)
 			if err != nil {
-				dto.SendErrorJsonResponse(w, logger, err.Error())
+				dto.SendErrorJsonResponse(w, logger, err.Error(), http.StatusBadRequest)
 				return
 			}
 

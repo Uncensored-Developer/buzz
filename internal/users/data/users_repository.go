@@ -21,7 +21,7 @@ func UserWithEmail(email string) repository.SelectCriteria {
 	}
 }
 
-func UserWithID(id int) repository.SelectCriteria {
+func UserWithID(id int64) repository.SelectCriteria {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.Where("id = ?", id)
 	}

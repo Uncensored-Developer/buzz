@@ -96,3 +96,16 @@ func (a *AuthenticationService) Login(ctx context.Context, email, password strin
 	}
 	return token, nil
 }
+
+func (a *AuthenticationService) GetUserFromToken(ctx context.Context, token string) (models.User, error) {
+	userId, err := a.tokenManager.Parse(token)
+	if err != nil {
+		return models.User{}, errors.Wrap(err, "token parse failed")
+	}
+
+	user, err := a.userRepo.FindOne(ctx, data.UserWithID(userId))
+	if err != nil {
+		return models.User{}, errors.Wrap(err, "user not found")
+	}
+	return user, nil
+}
