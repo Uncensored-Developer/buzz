@@ -20,9 +20,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - type: volume
-        source: db-data
-        target: /mysql
+      - mysql-data:/var/lib/mysql
     networks:
       - buzz_network
 
@@ -81,7 +79,8 @@ services:
       - buzz_network
 
 volumes:
-  db-data:
+  mysql-data:
+    driver: local
 
 networks:
   buzz_network:
