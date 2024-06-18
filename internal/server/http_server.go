@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Uncensored-Developer/buzz/internal/config"
-	"log"
+	"github.com/Uncensored-Developer/buzz/internal/users/features"
+	"github.com/Uncensored-Developer/buzz/pkg/config"
+	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"os"
@@ -14,23 +15,32 @@ import (
 )
 
 type Server struct {
-	config *config.Config
+	logger      *zap.Logger
+	config      *config.Config
+	authService *features.AuthenticationService
 }
 
-func NewServer(cfg *config.Config) *Server {
-	return &Server{config: cfg}
+func NewServer(
+	cfg *config.Config,
+	logger *zap.Logger,
+	authService *features.AuthenticationService,
+) *Server {
+	return &Server{config: cfg, logger: logger, authService: authService}
 }
 
-func (s *Server) setupHandler() http.Handler {
+func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	mux := http.NewServeMux()
 	var handler http.Handler = mux
 
 	// Middleware
+
+	// routes
+	addRoutes(ctx, mux, s.config, s.logger, s.authService)
 	return handler
 }
 
 func (s *Server) Run(ctx context.Context) error {
-	srv := s.setupHandler()
+	srv := s.setupHandler(ctx)
 
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(s.config.Host, s.config.Port),
@@ -38,7 +48,9 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 
 	go func() {
-		log.Printf("Listening on %s\n", httpServer.Addr)
+		logMsg := fmt.Sprintf("Listening on %s", httpServer.Addr)
+		s.logger.Info(logMsg)
+		//log.Printf("Listening on %s\n", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 		}
