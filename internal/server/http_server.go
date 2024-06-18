@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	features2 "github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"go.uber.org/zap"
@@ -15,17 +16,19 @@ import (
 )
 
 type Server struct {
-	logger      *zap.Logger
-	config      *config.Config
-	authService *features.AuthenticationService
+	logger       *zap.Logger
+	config       *config.Config
+	authService  *features.AuthenticationService
+	matchService *features2.MatchService
 }
 
 func NewServer(
 	cfg *config.Config,
 	logger *zap.Logger,
 	authService *features.AuthenticationService,
+	matchService *features2.MatchService,
 ) *Server {
-	return &Server{config: cfg, logger: logger, authService: authService}
+	return &Server{config: cfg, logger: logger, authService: authService, matchService: matchService}
 }
 
 func (s *Server) setupHandler(ctx context.Context) http.Handler {
@@ -35,7 +38,7 @@ func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	// Middleware
 
 	// routes
-	addRoutes(ctx, mux, s.config, s.logger, s.authService)
+	addRoutes(ctx, mux, s.config, s.logger, s.authService, s.matchService)
 	return handler
 }
 
