@@ -39,7 +39,7 @@ func NewCacheDatabase(ctx context.Context, logger *zap.Logger) (*TestCacheDataba
 	}, nil
 }
 
-func (t *TestDatabase) TestCacheDatabase() error {
+func (t *TestCacheDatabase) Shutdown() error {
 	err := t.container.Terminate(t.ctx)
 	if err == nil {
 		t.logger.Info("REDIS test database container shutdown successfully.")

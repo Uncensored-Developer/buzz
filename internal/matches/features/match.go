@@ -75,12 +75,12 @@ func (m *MatchService) Swipe(
 	// This is the format the key for all save swipe account should follow
 	// e.g. user 1 likes user 2 = `1.LIKE.2`
 	// e.g. user 3 passes user 5 = `3.PASS.5`
-	swipeActionTemplate := "%s." + string(action) + ".%s"
+	swipeActionTemplate := "%d." + string(action) + ".%d"
 	if action == Like {
 		// Check if swipedUser has previously liked user's profile
 		getKey := fmt.Sprintf(swipeActionTemplate, swipedUserID, swiperUserID)
 		_, err := m.cacheManager.Get(ctx, getKey)
-		if err == nil {
+		if err != nil {
 			// No match yet, just save to cache database
 			saveKey := fmt.Sprintf(swipeActionTemplate, swiperUserID, swipedUserID)
 			cacheDuration := time.Hour * 24 * 30 // 30 days
@@ -89,6 +89,11 @@ func (m *MatchService) Swipe(
 				m.logger.Error("cache save failed", zap.Error(err))
 				return models2.Match{}, errors.Wrap(err, "cache save failed")
 			}
+			m.logger.Info("swipe action saved",
+				zap.Int64("userId", swiperUserID),
+				zap.String("action", string(action)),
+				zap.Int64("swipedUserId", swipedUserID),
+			)
 		} else {
 			// Match found, save to matches repository
 			match := &models2.Match{
@@ -105,6 +110,9 @@ func (m *MatchService) Swipe(
 				data2.MatchWithUserOneID(match.UserOneID),
 				data2.MatchWithUserTwoID(match.UserTwoID),
 			)
+			m.logger.Info("match occured",
+				zap.Int64("matchID", gotMatch.ID),
+			)
 
 			// Delete swipe action from cache database
 			err = m.cacheManager.Delete(ctx, getKey)
@@ -112,7 +120,6 @@ func (m *MatchService) Swipe(
 				m.logger.Error("swipe action delete failed", zap.Error(err))
 				return models2.Match{}, errors.Wrap(err, "swipe action delete failed")
 			}
-
 			return gotMatch, nil
 		}
 	}

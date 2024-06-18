@@ -8,6 +8,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 	"os"
 	"testing"
 	"time"
@@ -20,6 +21,7 @@ type redisManagerTestSuite struct {
 	redisURL      string
 	redisDatabase *testcontainer.TestCacheDatabase
 	redisClient   *redis.Client
+	logger        *zap.Logger
 }
 
 func (r *redisManagerTestSuite) SetupSuite() {
@@ -28,6 +30,7 @@ func (r *redisManagerTestSuite) SetupSuite() {
 	redisContainer, err := testcontainer.NewCacheDatabase(ctx, zapLogger)
 	r.Require().NoError(err)
 	r.redisDatabase = redisContainer
+	r.logger = zapLogger
 
 	err = os.Setenv("REDIS_URL", redisContainer.DSN)
 	r.Require().NoError(err)
@@ -43,6 +46,17 @@ func (r *redisManagerTestSuite) SetupSuite() {
 	r.Require().NoError(err)
 
 	r.ctx = ctx
+}
+
+func (r *redisManagerTestSuite) TearDownSuite() {
+	err := os.Unsetenv("REDIS_URL")
+	if err != nil {
+		r.logger.Error("unset REDIS_URL env failed", zap.Error(err))
+	}
+	err = r.redisDatabase.Shutdown()
+	if err != nil {
+		r.logger.Error("failed to terminate redis database container", zap.Error(err))
+	}
 }
 
 // TestSave tests the Save method of the RedisManager.

@@ -59,3 +59,8 @@ func (b *BunRepository[T]) FindAll(ctx context.Context, filters ...repository.Se
 	err := q.Scan(ctx)
 	return rows, err
 }
+
+func (b *BunRepository[T]) Delete(ctx context.Context, model *T) error {
+	_, err := b.DB.NewDelete().Model(model).WherePK().Exec(ctx)
+	return err
+}
