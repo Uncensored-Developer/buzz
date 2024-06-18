@@ -14,3 +14,21 @@ type IMatchesRepository interface {
 func NewMatchesRepository(db bun.IDB) IMatchesRepository {
 	return bun_mysql.NewBunRepository[models.Match](db)
 }
+
+func MatchWithID(id int64) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("id = ?", id)
+	}
+}
+
+func MatchWithUserOneID(id int64) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("user_one_id = ?", id)
+	}
+}
+
+func MatchWithUserTwoID(id int64) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("user_two_id = ?", id)
+	}
+}
