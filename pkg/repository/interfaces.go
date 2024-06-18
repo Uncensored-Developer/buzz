@@ -12,3 +12,8 @@ type IRepository[T any] interface {
 	FindOne(context.Context, ...SelectCriteria) (T, error)
 	FindAll(context.Context, ...SelectCriteria) ([]T, error)
 }
+
+type ISimpleCacheRepository interface {
+	Set(ctx context.Context, key string, value string) error
+	Get(ctx context.Context, key string) (string, error)
+}
