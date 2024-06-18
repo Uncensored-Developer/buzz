@@ -101,6 +101,35 @@ func (u *userLoginTestSuite) TestLoginWithInvalidCredentials() {
 	u.Assert().Equal(&expectedLoginResponse, res.Error())
 }
 
+func (u *userLoginTestSuite) TestLoginWithValidCredentials() {
+	url := fmt.Sprintf("%s/login", u.ServerURL)
+
+	type successResponse struct {
+		Token string `json:"token"`
+	}
+	type loginReq struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	const expectedStatus = 200
+
+	loginInput := loginReq{
+		Email:    u.currentUser.Email,
+		Password: u.Config.FakeUserPassword,
+	}
+
+	client := resty.New()
+	res, err := client.R().SetBody(loginInput).SetResult(&successResponse{}).Post(url)
+	if err != nil {
+		u.Logger.Error("req client error", zap.Error(err))
+	}
+	u.Require().NoError(err)
+
+	u.Assert().Equal(expectedStatus, res.StatusCode())
+	u.Assert().NotEmpty(res.Result())
+}
+
 func TestUserLoginE2e(t *testing.T) {
 	suite.Run(t, new(userLoginTestSuite))
 }
