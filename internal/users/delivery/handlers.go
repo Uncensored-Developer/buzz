@@ -79,7 +79,6 @@ func HandleUserCreate(
 func HandleUserLogin(
 	ctx context.Context,
 	logger *zap.Logger,
-	cfg *config.Config,
 	authService *features.AuthenticationService,
 ) http.Handler {
 	type request struct {

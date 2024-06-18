@@ -26,6 +26,16 @@ services:
     networks:
       - buzz_network
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - buzz_network
+    ports:
+      - "8008:6379"
+    expose:
+      - "6379"
+
   mysql_db_go_migrate:
     container_name: mysql_db_go_migrate
     image: migrate/migrate:v4.17.1
@@ -57,11 +67,13 @@ services:
     depends_on:
       - mysql_db
       - mysql_db_go_migrate
+      - redis
     environment:
       - HTTP_HOST=0.0.0.0
       - HTTP_PORT=8003
       - DEBUG=true
       - DATABASE_URL=mysql://user:password@mysql_db:3306/buzz
+      - REDIS_URL=redis://redis:6379
       - JWT_KEY=wTkjqFUqqDpUGinAJqHZ
       - PASSWORD_HASHER_SALT=wTkjqFUqqDpUGinAJqHZ
       - FAKE_USER_PASSWORD=password123

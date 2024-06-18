@@ -126,31 +126,31 @@ func (m *matchServiceTestSuite) TearDownTest() {
 
 func (m *matchServiceTestSuite) TestSwipe_InvalidSwiperIdReturnsError() {
 	invalidSwiperID := int64(9999999)
-	_, err := m.matchService.Swipe(m.ctx, invalidSwiperID, m.userTwo.ID, features.Like)
+	_, err := m.matchService.Swipe(m.ctx, invalidSwiperID, m.userTwo.ID, features.YesAction)
 	m.Require().ErrorIs(err, features2.ErrUserNotFound)
 
-	_, err = m.matchService.Swipe(m.ctx, m.userOne.ID, invalidSwiperID, features.Like)
+	_, err = m.matchService.Swipe(m.ctx, m.userOne.ID, invalidSwiperID, features.YesAction)
 	m.Require().ErrorIs(err, features2.ErrUserNotFound)
 }
 
 func (m *matchServiceTestSuite) TestSwipe_LikeButNoMatch() {
-	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.Like)
+	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.YesAction)
 	m.Require().NoError(err)
 	m.Assert().Empty(match)
 
 	// Check if swipe action was actually saved to cache
-	key := fmt.Sprintf("%d.%s.%d", m.userOne.ID, features.Like, m.userTwo.ID)
+	key := fmt.Sprintf("%d.%s.%d", m.userOne.ID, features.YesAction, m.userTwo.ID)
 	_, err = m.cacheManager.Get(m.ctx, key)
 	m.Require().NoError(err)
 }
 
 func (m *matchServiceTestSuite) TestSwipe_LikeWithMatch() {
 	// userTwo first LIKE swipe userOne
-	_, err := m.matchService.Swipe(m.ctx, m.userTwo.ID, m.userOne.ID, features.Like)
+	_, err := m.matchService.Swipe(m.ctx, m.userTwo.ID, m.userOne.ID, features.YesAction)
 	m.Require().NoError(err)
 
 	// The userOne LIKE swipes userTwo
-	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.Like)
+	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.YesAction)
 	m.Require().NoError(err)
 	m.Require().NotEmpty(match)
 	m.Require().NotZero(match.ID)
@@ -161,7 +161,7 @@ func (m *matchServiceTestSuite) TestSwipe_LikeWithMatch() {
 	m.Assert().Equal(gotMatch, match)
 
 	// Check if swipe action was actually deleted from the cache
-	key := fmt.Sprintf("%d.%s.%d", m.userTwo.ID, features.Like, m.userOne.ID)
+	key := fmt.Sprintf("%d.%s.%d", m.userTwo.ID, features.YesAction, m.userOne.ID)
 	err = m.cacheManager.Delete(m.ctx, key)
 	m.Assert().NoError(err)
 }

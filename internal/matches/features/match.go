@@ -17,8 +17,8 @@ import (
 type SwipeAction string
 
 const (
-	Like SwipeAction = "LIKE"
-	Pass SwipeAction = "PASS"
+	YesAction SwipeAction = "YES"
+	NoAction  SwipeAction = "NO"
 )
 
 type MatchService struct {
@@ -47,10 +47,10 @@ func NewMatchService(
 
 // Swipe performs the swipe action between two users.
 // It checks if the swiper user and swiped user exist in the user repository.
-// If the action is "Like", it checks if there is a previous like from the swiped user.
+// If the action is "YesAction", it checks if there is a previous like from the swiped user.
 // If there is no previous like, it saves the swipe action to the cache database.
 // If there is a previous like, it saves the match to the matches repository and deletes the swipe action from the cache database.
-// For other swipe actions like "Pass" it does not perform any additional action.
+// For other swipe actions like "NoAction" it does not perform any additional action.
 // Parameters:
 // - ctx: The context.Context for the operation.
 // - swiperUserID: The ID of the user performing the swipe action, SHOULD BE THE AUTHENTICATED USER
@@ -73,10 +73,10 @@ func (m *MatchService) Swipe(
 		return models2.Match{}, features.ErrUserNotFound
 	}
 	// This is the format the key for all save swipe account should follow
-	// e.g. user 1 likes user 2 = `1.LIKE.2`
-	// e.g. user 3 passes user 5 = `3.PASS.5`
+	// e.g. user 1 likes user 2 = `1.YES.2`
+	// e.g. user 3 passes user 5 = `3.NO.5`
 	swipeActionTemplate := "%d." + string(action) + ".%d"
-	if action == Like {
+	if action == YesAction {
 		// Check if swipedUser has previously liked user's profile
 		getKey := fmt.Sprintf(swipeActionTemplate, swipedUserID, swiperUserID)
 		_, err := m.cacheManager.Get(ctx, getKey)
@@ -123,6 +123,6 @@ func (m *MatchService) Swipe(
 			return gotMatch, nil
 		}
 	}
-	// Handle other swipe accounts like PASS, SUPER LIKE etc.
+	// Handle other swipe accounts like NO, SUPER LIKE etc.
 	return models2.Match{}, nil
 }
