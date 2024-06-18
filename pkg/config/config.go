@@ -10,6 +10,7 @@ type Config struct {
 	Port               string `env:"HTTP_PORT" env-default:"8010"`
 	Debug              bool   `env:"DEBUG" env-default:"true"`
 	DatabaseURL        string `env:"DATABASE_URL"`
+	RedisURL           string `env:"REDIS_URL"`
 	JwtKey             string `env:"JWT_KEY" env-default:"fakeJwtkey"`
 	PasswordHasherSalt string `env:"PASSWORD_HASHER_SALT" env-default:"fakeHasherSalt"`
 	FakeUserPassword   string `env:"FAKE_USER_PASSWORD" env-default:"password123"`
