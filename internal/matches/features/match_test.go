@@ -134,36 +134,59 @@ func (m *matchServiceTestSuite) TestSwipe_InvalidSwiperIdReturnsError() {
 }
 
 func (m *matchServiceTestSuite) TestSwipe_LikeButNoMatch() {
-	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.YesAction)
+	userBefore, err := m.userRepo.FindOne(m.ctx, data.UserWithID(m.userTwo.ID))
 	m.Require().NoError(err)
+
+	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.YesAction)
+	m.Assert().NoError(err)
 	m.Assert().Empty(match)
+
+	userAfter, err := m.userRepo.FindOne(m.ctx, data.UserWithID(m.userTwo.ID))
+	m.Require().NoError(err)
+
+	// Check if the liked user's like count was increased
+	m.Assert().Equal(userBefore.LikesCount+1, userAfter.LikesCount)
 
 	// Check if swipe action was actually saved to cache
 	key := fmt.Sprintf("%d.%s.%d", m.userOne.ID, features.YesAction, m.userTwo.ID)
 	_, err = m.cacheManager.Get(m.ctx, key)
-	m.Require().NoError(err)
+	m.Assert().NoError(err)
 }
 
 func (m *matchServiceTestSuite) TestSwipe_LikeWithMatch() {
-	// userTwo first LIKE swipe userOne
-	_, err := m.matchService.Swipe(m.ctx, m.userTwo.ID, m.userOne.ID, features.YesAction)
+	userTwoBefore, err := m.userRepo.FindOne(m.ctx, data.UserWithID(m.userTwo.ID))
 	m.Require().NoError(err)
+	userOneBefore, err := m.userRepo.FindOne(m.ctx, data.UserWithID(m.userOne.ID))
+	m.Require().NoError(err)
+
+	// userTwo first LIKE swipe userOne
+	_, err = m.matchService.Swipe(m.ctx, m.userTwo.ID, m.userOne.ID, features.YesAction)
+	m.Assert().NoError(err)
 
 	// The userOne LIKE swipes userTwo
 	match, err := m.matchService.Swipe(m.ctx, m.userOne.ID, m.userTwo.ID, features.YesAction)
+	m.Assert().NoError(err)
+	m.Assert().NotEmpty(match)
+	m.Assert().NotZero(match.ID)
+
+	userTwoAfter, err := m.userRepo.FindOne(m.ctx, data.UserWithID(m.userTwo.ID))
 	m.Require().NoError(err)
-	m.Require().NotEmpty(match)
-	m.Require().NotZero(match.ID)
+	userOneAfter, err := m.userRepo.FindOne(m.ctx, data.UserWithID(m.userOne.ID))
+	m.Require().NoError(err)
 
 	// Check if match was saved to matched repository
 	gotMatch, err := m.matchesRepo.FindOne(m.ctx, data2.MatchWithID(match.ID))
-	m.Require().NoError(err)
+	m.Assert().NoError(err)
 	m.Assert().Equal(gotMatch, match)
 
 	// Check if swipe action was actually deleted from the cache
 	key := fmt.Sprintf("%d.%s.%d", m.userTwo.ID, features.YesAction, m.userOne.ID)
 	err = m.cacheManager.Delete(m.ctx, key)
 	m.Assert().NoError(err)
+
+	// Check if the liked user's like count was increased
+	m.Assert().Equal(userOneBefore.LikesCount+1, userOneAfter.LikesCount)
+	m.Assert().Equal(userTwoBefore.LikesCount+1, userTwoAfter.LikesCount)
 }
 
 func TestMatchService(t *testing.T) {

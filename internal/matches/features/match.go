@@ -77,6 +77,7 @@ func (m *MatchService) Swipe(
 	// e.g. user 3 passes user 5 = `3.NO.5`
 	swipeActionTemplate := "%d." + string(action) + ".%d"
 	if action == YesAction {
+		var gotMatch models2.Match
 		// Check if swipedUser has previously liked user's profile
 		getKey := fmt.Sprintf(swipeActionTemplate, swipedUserID, swiperUserID)
 		_, err := m.cacheManager.Get(ctx, getKey)
@@ -106,7 +107,7 @@ func (m *MatchService) Swipe(
 				return models2.Match{}, errors.Wrap(err, "match save failed")
 			}
 
-			gotMatch, _ := m.matchesRepo.FindOne(ctx,
+			gM, _ := m.matchesRepo.FindOne(ctx,
 				data2.MatchWithUserOneID(match.UserOneID),
 				data2.MatchWithUserTwoID(match.UserTwoID),
 			)
@@ -120,8 +121,16 @@ func (m *MatchService) Swipe(
 				m.logger.Error("swipe action delete failed", zap.Error(err))
 				return models2.Match{}, errors.Wrap(err, "swipe action delete failed")
 			}
-			return gotMatch, nil
+			gotMatch = gM
 		}
+
+		// Increment likes count for swiped user
+		err = m.userRepo.IncrementLikes(ctx, swipedUserID, 1)
+		if err != nil {
+			m.logger.Error("increment likes failed", zap.Error(err))
+			return models2.Match{}, errors.Wrap(err, "increment likes failed")
+		}
+		return gotMatch, nil
 	}
 	// Handle other swipe accounts like NO, SUPER LIKE etc.
 	return models2.Match{}, nil

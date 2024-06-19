@@ -88,7 +88,7 @@ func CreateUser(ctx context.Context, dob time.Time, email, password, gender stri
 		dob = gofakeit.PastDate()
 	}
 
-	user, err := authService.SignUp(ctx, dob, name, email, password, gender)
+	user, err := authService.SignUp(ctx, dob, 0, 0, name, email, password, gender)
 	if err != nil {
 		return nil, errors.Wrap(err, "user signup failed")
 	}
