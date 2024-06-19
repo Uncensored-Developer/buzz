@@ -2,7 +2,6 @@ package features
 
 import (
 	"context"
-	"fmt"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
@@ -13,10 +12,18 @@ import (
 	"time"
 )
 
+type Gender string
+
+const (
+	MaleGender   Gender = "M"
+	FemaleGender Gender = "F"
+	OtherGender  Gender = "O"
+)
+
 type MatchFilter struct {
 	MinAge int
 	MaxAge int
-	Gender string
+	Gender Gender
 }
 
 type DiscoverService struct {
@@ -42,15 +49,6 @@ func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int6
 	if err != nil {
 		return nil, features.ErrUserNotFound
 	}
-
-	if filters.Gender == "" {
-		if authUser.Gender == "M" {
-			filters.Gender = "F"
-		} else {
-			filters.Gender = "M"
-		}
-	}
-	fmt.Printf("%+v\n", filters)
 	now := time.Now()
 
 	var opts = []repository.SelectCriteria{
@@ -61,17 +59,23 @@ func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int6
 
 	if filters.MinAge > 0 && filters.MaxAge == 0 {
 		// MinAge passed but no max age
-		minDate := now.AddDate(-filters.MinAge, 0, 0)
-		maxDate := now.AddDate(-maxAge-1, 0, 0).AddDate(0, 0, 1)
-		opts = append(opts, data.UsersWithinDobRange(minDate, maxDate))
+		startDate := now.AddDate(-maxAge, 0, 0)
+		endDate := now.AddDate(-filters.MinAge, 0, 0)
+		opts = append(opts, data.UsersWithinDobRange(startDate, endDate))
 	} else if filters.MinAge == 0 && filters.MaxAge > 0 {
-
 		// MaxAge passed but no min age
-		minDate := now.AddDate(-minAge, 0, 0)
-		maxDate := now.AddDate(-filters.MaxAge-1, 0, 0).AddDate(0, 0, 1)
-		opts = append(opts, data.UsersWithinDobRange(minDate, maxDate))
-	} else {
-		opts = append(opts, data.UsersWithGender(filters.Gender))
+		startDate := now.AddDate(-filters.MaxAge, 0, 0)
+		endDate := now.AddDate(-minAge, 0, 0)
+		opts = append(opts, data.UsersWithinDobRange(startDate, endDate))
+	} else if filters.MinAge > 0 && filters.MaxAge > 0 {
+		// MinAge and MaxAge passed
+		startDate := now.AddDate(-filters.MaxAge, 0, 0)
+		endDate := now.AddDate(-filters.MinAge, 0, 0)
+		opts = append(opts, data.UsersWithinDobRange(startDate, endDate))
+	}
+
+	if filters.Gender != "" {
+		opts = append(opts, data.UsersWithGender(string(filters.Gender)))
 	}
 
 	users, err := d.userRepo.FindAll(ctx, opts...)

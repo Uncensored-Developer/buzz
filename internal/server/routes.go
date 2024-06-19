@@ -18,11 +18,15 @@ func addRoutes(
 	logger *zap.Logger,
 	authService *features.AuthenticationService,
 	matchService *features2.MatchService,
+	discService *features2.DiscoverService,
 ) {
 	mux.Handle("/user/create", delivery.HandleUserCreate(ctx, logger, cfg, authService))
 	mux.Handle("/login", delivery.HandleUserLogin(ctx, logger, authService))
 	mux.Handle("/swipe", delivery.LoggedInOnly(
 		ctx, logger, authService,
 		delivery2.HandleUserSwipe(ctx, logger, matchService)))
+	mux.Handle("/discovery", delivery.LoggedInOnly(
+		ctx, logger, authService,
+		delivery2.HandleFetchPotentialMatches(ctx, logger, discService)))
 	mux.Handle("/health", HandleHealthCheck(logger))
 }

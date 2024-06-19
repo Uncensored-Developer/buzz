@@ -73,15 +73,15 @@ func (d *discoverServiceTestSuite) SetupSuite() {
 			Email:    gofakeit.Email(),
 			Password: cfg.FakeUserPassword,
 			Name:     gofakeit.Name(),
-			Gender:   "F",
-			Dob:      time.Date(2004, 2, 24, 0, 0, 0, 0, time.UTC),
+			Gender:   "M",
+			Dob:      time.Date(1995, 3, 24, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			Email:    gofakeit.Email(),
 			Password: cfg.FakeUserPassword,
 			Name:     gofakeit.Name(),
-			Gender:   "M",
-			Dob:      time.Date(1995, 3, 24, 0, 0, 0, 0, time.UTC),
+			Gender:   "F",
+			Dob:      time.Date(2004, 2, 24, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			Email:    gofakeit.Email(),
@@ -107,7 +107,7 @@ func (d *discoverServiceTestSuite) TearDownSuite() {
 	}
 }
 
-func (d *discoverServiceTestSuite) TestFetchPotentialMatches_GenderFilter() {
+func (d *discoverServiceTestSuite) TestFetchPotentialMatches() {
 
 	testCase := map[string]struct {
 		filter        features.MatchFilter
@@ -115,19 +115,39 @@ func (d *discoverServiceTestSuite) TestFetchPotentialMatches_GenderFilter() {
 		expectedCount int
 	}{
 		"male only": {
-			filter:        features.MatchFilter{Gender: "M"},
+			filter:        features.MatchFilter{Gender: features.MaleGender},
 			expectedErr:   nil,
 			expectedCount: 2,
 		},
 		"female only": {
-			filter:        features.MatchFilter{Gender: "F"},
+			filter:        features.MatchFilter{Gender: features.FemaleGender},
 			expectedErr:   nil,
 			expectedCount: 1,
 		},
 		"others only": {
-			filter:        features.MatchFilter{Gender: "O"},
+			filter:        features.MatchFilter{Gender: features.OtherGender},
 			expectedErr:   nil,
 			expectedCount: 1,
+		},
+		"minimum age only": {
+			filter:        features.MatchFilter{MinAge: 25},
+			expectedErr:   nil,
+			expectedCount: 2,
+		},
+		"maximum age only": {
+			filter:        features.MatchFilter{MaxAge: 24},
+			expectedErr:   nil,
+			expectedCount: 2,
+		},
+		"age range only": {
+			filter:        features.MatchFilter{MinAge: 21, MaxAge: 28},
+			expectedErr:   nil,
+			expectedCount: 1,
+		},
+		"age range and gender": {
+			filter:        features.MatchFilter{MinAge: 21, MaxAge: 28, Gender: features.OtherGender},
+			expectedErr:   nil,
+			expectedCount: 0,
 		},
 	}
 

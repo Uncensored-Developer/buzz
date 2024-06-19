@@ -8,6 +8,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"go.uber.org/zap"
+	"math/rand/v2"
 	"net/http"
 	"strings"
 	"time"
@@ -43,13 +44,14 @@ func HandleUserCreate(
 				return
 			}
 			logger.Info("Handling user signup")
-
+			age := rand.IntN(43) + 18
+			now := time.Now()
 			// generate random user details for signup
 			email := gofakeit.Email()
 			name := gofakeit.Name()
 			password := cfg.FakeUserPassword
 			gender := strings.ToUpper(string([]rune(gofakeit.Gender())[0]))
-			dob := gofakeit.PastDate()
+			dob := now.AddDate(-age, int(now.Month()), now.Day())
 
 			user, err := authService.SignUp(ctx, dob, name, email, password, gender)
 			if err != nil {

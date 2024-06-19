@@ -34,9 +34,9 @@ func UserWithEmailAndPassword(email, password string) repository.SelectCriteria 
 	}
 }
 
-func UsersWithinDobRange(min, max time.Time) repository.SelectCriteria {
+func UsersWithinDobRange(start, end time.Time) repository.SelectCriteria {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
-		return query.Where("dob >= ? AND dob <= ?", min, max)
+		return query.Where("dob BETWEEN ? AND ?", start, end)
 	}
 }
 

@@ -21,6 +21,7 @@ type TestServerSuite struct {
 	ShutdownServerFunc func()
 	Logger             *zap.Logger
 	DbContainer        *testcontainer.TestDatabase
+	CacheDbContainer   *testcontainer.TestCacheDatabase
 	Config             *config.Config
 }
 
@@ -44,8 +45,18 @@ func (s *TestServerSuite) StartUp() error {
 		return errors.Wrap(err, "migration failed")
 	}
 
+	s.CacheDbContainer, err = testcontainer.NewCacheDatabase(s.Ctx, s.Logger)
+	if err != nil {
+		return errors.Wrap(err, "test cache database failed to start")
+	}
+
 	// This is necessary for the config.LoadConfig to pick this from the environment variables
 	err = os.Setenv("DATABASE_URL", testDatabase.DSN)
+	if err != nil {
+		return errors.Wrap(err, "set env failed")
+	}
+
+	err = os.Setenv("REDIS_URL", s.CacheDbContainer.DSN)
 	if err != nil {
 		return errors.Wrap(err, "set env failed")
 	}
