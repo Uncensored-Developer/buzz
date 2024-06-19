@@ -8,6 +8,9 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"go.uber.org/zap"
 	"net/http"
+	"regexp"
+	"strconv"
+	"time"
 )
 
 func HandleUserSwipe(
@@ -86,4 +89,107 @@ func HandleUserSwipe(
 			return
 		},
 	)
+}
+
+func HandleFetchPotentialMatches(
+	ctx context.Context,
+	logger *zap.Logger,
+	discService *features.DiscoverService,
+) http.Handler {
+
+	type userResp struct {
+		Id     int64  `json:"id"`
+		Name   string `json:"name"`
+		Gender string `json:"gender"`
+		Age    int    `json:"age"`
+	}
+
+	type successResp struct {
+		Results []userResp `json:"results"`
+	}
+
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+				return
+			}
+			logger.Info("Handling fetch potential matches")
+			authUser := r.Context().Value("user").(models.User)
+
+			searchGender := ""
+			if authUser.Gender == "M" {
+				searchGender = "F"
+			} else {
+				searchGender = "M"
+			}
+
+			minAge := 18
+			maxAge := 60
+			ageRangeStr := r.URL.Query().Get("age_range")
+			if ageRangeStr != "" {
+				ageRangePattern := `^(\d+)-(\d+)$`
+				re := regexp.MustCompile(ageRangePattern)
+
+				// Check if ageRangeStr matches pattern
+				matches := re.FindStringSubmatch(ageRangeStr)
+				if matches == nil {
+					var msg = map[string]string{"age_range": "Invalid age range format"}
+					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
+					return
+				}
+
+				start, err1 := strconv.Atoi(matches[1])
+				minAge = start
+				end, err2 := strconv.Atoi(matches[2])
+				maxAge = end
+				if err1 != nil || err2 != nil {
+					var msg = map[string]string{"age_range": "Invalid range values"}
+					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
+					return
+				}
+			}
+
+			gender := r.URL.Query().Get("gender")
+			if gender != "" {
+				if !isValidGender(gender) {
+					var msg = map[string]string{"gender": "Invalid gender values"}
+					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
+					return
+				}
+				searchGender = gender
+			}
+
+			filters := features.MatchFilter{MinAge: minAge, MaxAge: maxAge, Gender: features.Gender(searchGender)}
+
+			users, err := discService.FetchPotentialMatches(ctx, authUser.ID, filters)
+			if err != nil {
+				dto.SendErrorJsonResponse[string](w, logger, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			var usersResp []userResp
+			for _, user := range users {
+				userResponse := userResp{
+					Id:     user.ID,
+					Name:   user.Name,
+					Gender: user.Gender,
+					Age:    time.Now().Year() - user.Dob.Year(),
+				}
+				usersResp = append(usersResp, userResponse)
+			}
+			resp := successResp{usersResp}
+
+			err = dto.Encode[successResp](w, http.StatusOK, resp)
+			if err != nil {
+				logger.Error("could not encode success response",
+					zap.Error(err))
+			}
+			return
+		},
+	)
+}
+
+func isValidGender(gender string) bool {
+	return gender == "M" || gender == "F" || gender == "O"
 }

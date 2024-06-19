@@ -38,8 +38,8 @@ func InitializeServer() (*Server, error) {
 	cacheManager := cache.NewRedisManager(cfg)
 
 	authService := features.NewAuthenticationService(passwordHasher, manager, userRepo, cfg, zapLogger)
-
 	matchService := features2.NewMatchService(userRepo, matchesRepo, cacheManager, cfg, zapLogger)
+	discoverService := features2.NewDiscoverService(userRepo, cfg, zapLogger)
 
-	return NewServer(cfg, zapLogger, authService, matchService), err
+	return NewServer(cfg, zapLogger, authService, matchService, discoverService), err
 }

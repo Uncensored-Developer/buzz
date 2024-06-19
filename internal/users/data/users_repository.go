@@ -5,6 +5,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
 	"github.com/uptrace/bun"
+	"time"
 )
 
 type IUserRepository interface {
@@ -30,5 +31,23 @@ func UserWithID(id int64) repository.SelectCriteria {
 func UserWithEmailAndPassword(email, password string) repository.SelectCriteria {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.Where("email = ?", email).Where("password = ?", password)
+	}
+}
+
+func UsersWithinDobRange(start, end time.Time) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("dob BETWEEN ? AND ?", start, end)
+	}
+}
+
+func UsersWithGender(gender string) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("gender = ?", gender)
+	}
+}
+
+func UsersExcludingID(id int64) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("id != ?", id)
 	}
 }
