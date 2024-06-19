@@ -16,11 +16,12 @@ import (
 )
 
 type Server struct {
-	logger       *zap.Logger
-	config       *config.Config
-	authService  *features.AuthenticationService
-	matchService *features2.MatchService
-	discService  *features2.DiscoverService
+	logger         *zap.Logger
+	config         *config.Config
+	authService    *features.AuthenticationService
+	matchService   *features2.MatchService
+	discService    *features2.DiscoverService
+	profileService *features.UserProfilesService
 }
 
 func NewServer(
@@ -29,13 +30,15 @@ func NewServer(
 	authService *features.AuthenticationService,
 	matchService *features2.MatchService,
 	discService *features2.DiscoverService,
+	profileService *features.UserProfilesService,
 ) *Server {
 	return &Server{
-		config:       cfg,
-		logger:       logger,
-		authService:  authService,
-		matchService: matchService,
-		discService:  discService,
+		config:         cfg,
+		logger:         logger,
+		authService:    authService,
+		matchService:   matchService,
+		discService:    discService,
+		profileService: profileService,
 	}
 }
 
@@ -46,7 +49,7 @@ func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	// Middleware
 
 	// routes
-	addRoutes(ctx, mux, s.config, s.logger, s.authService, s.matchService, s.discService)
+	addRoutes(ctx, mux, s.config, s.logger, s.authService, s.matchService, s.discService, s.profileService)
 	return handler
 }
 

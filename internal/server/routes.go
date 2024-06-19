@@ -19,6 +19,7 @@ func addRoutes(
 	authService *features.AuthenticationService,
 	matchService *features2.MatchService,
 	discService *features2.DiscoverService,
+	profilesService *features.UserProfilesService,
 ) {
 	mux.Handle("/user/create", delivery.HandleUserCreate(ctx, logger, cfg, authService))
 	mux.Handle("/login", delivery.HandleUserLogin(ctx, logger, authService))
@@ -28,5 +29,8 @@ func addRoutes(
 	mux.Handle("/discovery", delivery.LoggedInOnly(
 		ctx, logger, authService,
 		delivery2.HandleFetchPotentialMatches(ctx, logger, discService)))
+	mux.Handle("/update", delivery.LoggedInOnly(
+		ctx, logger, authService,
+		delivery.HandleUpdateProfileLocation(ctx, logger, profilesService)))
 	mux.Handle("/health", HandleHealthCheck(logger))
 }

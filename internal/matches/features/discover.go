@@ -44,6 +44,10 @@ func NewDiscoverService(
 	}
 }
 
+// FetchPotentialMatches fetches potential matches for the given user ID and filters.
+// It retrieves the authenticated user (userId), applies the filters, and returns a list of potential matches.
+// If the user is not found, it returns ErrUserNotFound.
+// The function uses the userRepo to retrieve matching users based on the provided filters.
 func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int64, filters MatchFilter) ([]models.User, error) {
 	authUser, err := d.userRepo.FindOne(ctx, data.UserWithID(userId))
 	if err != nil {
