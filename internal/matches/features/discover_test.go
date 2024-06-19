@@ -11,7 +11,10 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/migrate"
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
+	"github.com/uber/h3-go/v4"
+	"github.com/uptrace/bun"
 	"go.uber.org/zap"
 	"os"
 	"testing"
@@ -25,6 +28,8 @@ type discoverServiceTestSuite struct {
 	testDatabase    *testcontainer.TestDatabase
 	discoverService *features.DiscoverService
 	testUsers       []models.User
+	bunDb           *bun.DB
+	cfg             *config.Config
 }
 
 func (d *discoverServiceTestSuite) SetupSuite() {
@@ -46,11 +51,12 @@ func (d *discoverServiceTestSuite) SetupSuite() {
 
 	cfg, err := config.LoadConfig()
 	d.Require().NoError(err)
+	d.cfg = cfg
 
-	bunDb, err := db.Connect(d.testDatabase.DSN)
+	d.bunDb, err = db.Connect(d.testDatabase.DSN)
 	d.Require().NoError(err)
 
-	userRepo := data.NewUserRepository(bunDb)
+	userRepo := data.NewUserRepository(d.bunDb)
 
 	d.discoverService = features.NewDiscoverService(userRepo, cfg, d.logger)
 
@@ -91,7 +97,7 @@ func (d *discoverServiceTestSuite) SetupSuite() {
 			Dob:      time.Date(1988, 3, 24, 0, 0, 0, 0, time.UTC),
 		},
 	}
-	_, err = bunDb.NewInsert().Model(&d.testUsers).Exec(d.ctx)
+	_, err = d.bunDb.NewInsert().Model(&d.testUsers).Exec(d.ctx)
 	d.Require().NoError(err)
 }
 
@@ -107,7 +113,7 @@ func (d *discoverServiceTestSuite) TearDownSuite() {
 	}
 }
 
-func (d *discoverServiceTestSuite) TestFetchPotentialMatches() {
+func (d *discoverServiceTestSuite) TestFetchPotentialMatches_NoRadius() {
 
 	testCase := map[string]struct {
 		filter        features.MatchFilter
@@ -160,6 +166,108 @@ func (d *discoverServiceTestSuite) TestFetchPotentialMatches() {
 	}
 }
 
+func (d *discoverServiceTestSuite) TestFetchPotentialMatches_WithRadius() {
+	testUsers, teardown, err := setupUsers(d.ctx, d.cfg, d.bunDb, d.logger)
+	d.Require().NoError(err)
+	defer teardown()
+
+	filters := features.MatchFilter{
+		Radius: 100,
+	}
+	wantCount := 3
+	wantEmails := []string{"user2@buzz.com", "user3@buzz.com", "user4@buzz.com"}
+	users, err := d.discoverService.FetchPotentialMatches(d.ctx, testUsers[0].ID, filters)
+
+	var gotEmails []string
+	for _, user := range users {
+		gotEmails = append(gotEmails, user.Email)
+	}
+	d.Require().NoError(err)
+	d.Assert().Equal(wantCount, len(users))
+	d.Assert().ElementsMatch(wantEmails, gotEmails)
+}
+
 func TestDiscoverService(t *testing.T) {
 	suite.Run(t, new(discoverServiceTestSuite))
+}
+
+func setupUsers(
+	ctx context.Context,
+	cfg *config.Config,
+	db *bun.DB,
+	logger *zap.Logger,
+) ([]models.User, func() error, error) {
+	testUsers := []models.User{
+		{
+			Email:     "user1@buzz.com",
+			Password:  "fakePass",
+			Name:      gofakeit.Name(),
+			Gender:    "F",
+			Dob:       time.Date(1999, 3, 24, 0, 0, 0, 0, time.UTC),
+			Longitude: 0.5026768,
+			Latitude:  51.2725887,
+		},
+		{
+			Email:     "user2@buzz.com",
+			Password:  "cfg.FakeUserPassword",
+			Name:      gofakeit.Name(),
+			Gender:    "M",
+			Dob:       time.Date(2001, 3, 24, 0, 0, 0, 0, time.UTC),
+			Latitude:  50.96284649,
+			Longitude: -0.12981616,
+		},
+		{
+			Email:     "user3@buzz.com",
+			Password:  "cfg.FakeUserPassword",
+			Name:      gofakeit.Name(),
+			Gender:    "M",
+			Dob:       time.Date(1995, 3, 24, 0, 0, 0, 0, time.UTC),
+			Latitude:  51.03052403,
+			Longitude: 0.18169958,
+		},
+		{
+			Email:     "user4@buzz.com",
+			Password:  "user1@buzz.com",
+			Name:      gofakeit.Name(),
+			Gender:    "F",
+			Dob:       time.Date(2004, 2, 24, 0, 0, 0, 0, time.UTC),
+			Longitude: 0.62093072,
+			Latitude:  51.31488722,
+		},
+		{
+			Email:     "user5@buzz.com",
+			Password:  "cfg.FakeUserPassword",
+			Name:      gofakeit.Name(),
+			Gender:    "O",
+			Dob:       time.Date(1988, 3, 24, 0, 0, 0, 0, time.UTC),
+			Latitude:  6.524379,
+			Longitude: 3.379206,
+		},
+	}
+	_, err := db.NewInsert().Model(&testUsers).Exec(ctx)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to create test location users")
+	}
+
+	var emails []string
+	for _, user := range testUsers {
+		emails = append(emails, user.Email)
+
+		latLng := h3.NewLatLng(user.Latitude, user.Latitude)
+		cell := h3.LatLngToCell(latLng, cfg.H3Resolution)
+		user.H3Index = int64(cell)
+
+		_, err = db.NewUpdate().Model(&user).WherePK().Returning("*").Exec(ctx)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "failed to update h3_index")
+		}
+	}
+	return testUsers, func() error {
+		_, err := db.NewDelete().Model(&models.User{}).Where("email IN (?)", bun.In(emails)).Exec(ctx)
+		if err != nil {
+			logger.Error("failed to create test location users", zap.Error(err))
+			return errors.Wrap(err, "failed to create test location users")
+		}
+		return nil
+	}, nil
 }

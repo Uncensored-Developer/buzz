@@ -43,19 +43,12 @@ func (u *UserProfilesService) UpdateLocation(ctx context.Context, userId int64, 
 	}
 
 	latLng := h3.NewLatLng(lat, long)
-	const resolution = 9 // For good balance between precision (for a dating app usecase) and performance
-
-	cell := h3.LatLngToCell(latLng, resolution)
+	cell := h3.LatLngToCell(latLng, u.config.H3Resolution)
 
 	authUser.Latitude = lat
 	authUser.Longitude = long
 	authUser.H3Index = int64(cell)
-	//user := models.User{
-	//	ID:        authUser.ID,
-	//	Longitude: long,
-	//	Latitude:  lat,
-	//	H3Index:   int64(cell),
-	//}
+
 	err = u.userRepo.Update(ctx, &authUser)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "update location failed")

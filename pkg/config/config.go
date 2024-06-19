@@ -14,6 +14,9 @@ type Config struct {
 	JwtKey             string `env:"JWT_KEY" env-default:"fakeJwtkey"`
 	PasswordHasherSalt string `env:"PASSWORD_HASHER_SALT" env-default:"fakeHasherSalt"`
 	FakeUserPassword   string `env:"FAKE_USER_PASSWORD" env-default:"password123"`
+
+	// For good balance between precision (for a dating app use case) and performance
+	H3Resolution int `env:"H3_RESOLUTION" env-default:"9"`
 }
 
 func LoadConfig() (*Config, error) {

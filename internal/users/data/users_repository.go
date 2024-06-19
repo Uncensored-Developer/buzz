@@ -4,6 +4,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
+	"github.com/uber/h3-go/v4"
 	"github.com/uptrace/bun"
 	"time"
 )
@@ -49,5 +50,11 @@ func UsersWithGender(gender string) repository.SelectCriteria {
 func UsersExcludingID(id int64) repository.SelectCriteria {
 	return func(query *bun.SelectQuery) *bun.SelectQuery {
 		return query.Where("id != ?", id)
+	}
+}
+
+func UsersWithinH3Indexes(indexes []h3.Cell) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Where("h3_index IN (?)", bun.In(indexes))
 	}
 }
