@@ -115,7 +115,7 @@ func (a *AuthenticationServiceTestSuite) TestSignUpWithTakenEmail() {
 	name := "John Doe"
 	gender := "M"
 	dob := time.Now()
-	_, err = authService.SignUp(a.ctx, dob, name, testUserEmail, testUserPassword, gender)
+	_, err = authService.SignUp(a.ctx, dob, 0, 0, name, testUserEmail, testUserPassword, gender)
 	a.Assert().ErrorIs(err, features.ErrEmailTaken)
 }
 
@@ -127,7 +127,7 @@ func (a *AuthenticationServiceTestSuite) TestSignUpWithCorrectDetails() {
 	name := "John Doe"
 	gender := "M"
 	dob := gofakeit.PastDate()
-	user, err := authService.SignUp(a.ctx, dob, name, email, testUserPassword, gender)
+	user, err := authService.SignUp(a.ctx, dob, 0, 0, name, email, testUserPassword, gender)
 	a.Require().NoError(err)
 	a.Assert().Equal(email, user.Email)
 	a.Assert().Equal(name, user.Name)
