@@ -8,6 +8,8 @@ import (
 	"github.com/uptrace/bun"
 )
 
+var ErrRowNotFound = errors.New("row not found")
+
 // BunRepository is a generic repository implementation that uses bun as the underlying database ORM.
 type BunRepository[T any] struct {
 	DB bun.IDB
@@ -39,7 +41,7 @@ func (b *BunRepository[T]) FindOne(ctx context.Context, filters ...repository.Se
 
 	err := q.Limit(1).Scan(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
-		return row, errors.Wrap(err, "could not find entity.")
+		return row, ErrRowNotFound
 	}
 	return row, err
 }
