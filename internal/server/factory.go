@@ -40,6 +40,7 @@ func InitializeServer() (*Server, error) {
 	authService := features.NewAuthenticationService(passwordHasher, manager, userRepo, cfg, zapLogger)
 	matchService := features2.NewMatchService(userRepo, matchesRepo, cacheManager, cfg, zapLogger)
 	discoverService := features2.NewDiscoverService(userRepo, cfg, zapLogger)
+	profilesService := features.NewUserProfilesService(userRepo, cfg, zapLogger)
 
-	return NewServer(cfg, zapLogger, authService, matchService, discoverService), err
+	return NewServer(cfg, zapLogger, authService, matchService, discoverService, profilesService), err
 }

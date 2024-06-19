@@ -45,6 +45,7 @@ func NewAuthenticationService(
 func (a *AuthenticationService) SignUp(
 	ctx context.Context,
 	dob time.Time,
+	lat, long float64,
 	name, email, password, gender string) (models.User, error) {
 
 	_, err := a.userRepo.FindOne(ctx, data.UserWithEmail(email))

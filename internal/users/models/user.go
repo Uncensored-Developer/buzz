@@ -14,6 +14,9 @@ type User struct {
 	Name      string    `bun:"name,notnull"`
 	Gender    string    `bun:"gender,notnull"`
 	Dob       time.Time `bun:"dob,notnull,type:date"`
+	Longitude float64   `bun:"longitude"`
+	Latitude  float64   `bun:"latitude"`
+	H3Index   int64     `bun:"h3_index"`
 	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 }

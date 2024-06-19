@@ -52,8 +52,14 @@ func HandleUserCreate(
 			password := cfg.FakeUserPassword
 			gender := strings.ToUpper(string([]rune(gofakeit.Gender())[0]))
 			dob := now.AddDate(-age, int(now.Month()), now.Day())
+			lat := gofakeit.Latitude()
+			long := gofakeit.Longitude()
 
-			user, err := authService.SignUp(ctx, dob, name, email, password, gender)
+			user, err := authService.SignUp(
+				ctx, dob,
+				lat, long,
+				name, email, password, gender,
+			)
 			if err != nil {
 				dto.SendErrorJsonResponse(w, logger, err.Error(), http.StatusBadRequest)
 			} else {

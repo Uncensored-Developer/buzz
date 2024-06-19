@@ -18,6 +18,7 @@ type IRepository[T any] interface {
 	FindOne(context.Context, ...SelectCriteria) (T, error)
 	FindAll(context.Context, ...SelectCriteria) ([]T, error)
 	Delete(context.Context, *T) error
+	Update(context.Context, *T) error
 }
 
 // ISimpleCacheManager is an interface for a simple cache repository that provides

@@ -5,6 +5,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/server/dto"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
+	"github.com/Uncensored-Developer/buzz/pkg/utils"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"go.uber.org/zap"
 	"net/http"
@@ -98,10 +99,11 @@ func HandleFetchPotentialMatches(
 ) http.Handler {
 
 	type userResp struct {
-		Id     int64  `json:"id"`
-		Name   string `json:"name"`
-		Gender string `json:"gender"`
-		Age    int    `json:"age"`
+		Id             int64  `json:"id"`
+		Name           string `json:"name"`
+		Gender         string `json:"gender"`
+		Age            int    `json:"age"`
+		DistanceFromMe int    `json:"distanceFromMe"`
 	}
 
 	type successResp struct {
@@ -144,7 +146,7 @@ func HandleFetchPotentialMatches(
 				end, err2 := strconv.Atoi(matches[2])
 				maxAge = end
 				if err1 != nil || err2 != nil {
-					var msg = map[string]string{"age_range": "Invalid range values"}
+					var msg = map[string]string{"age_range": "Invalid range value"}
 					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
 					return
 				}
@@ -153,15 +155,27 @@ func HandleFetchPotentialMatches(
 			gender := r.URL.Query().Get("gender")
 			if gender != "" {
 				if !isValidGender(gender) {
-					var msg = map[string]string{"gender": "Invalid gender values"}
+					var msg = map[string]string{"gender": "Invalid gender value"}
 					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
 					return
 				}
 				searchGender = gender
 			}
 
-			filters := features.MatchFilter{MinAge: minAge, MaxAge: maxAge, Gender: features.Gender(searchGender)}
+			distance := r.URL.Query().Get("distance_from")
+			radius, err := strconv.Atoi(distance)
+			if err != nil {
+				var msg = map[string]string{"gender": "Invalid distance_from value"}
+				dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
+				return
+			}
 
+			filters := features.MatchFilter{
+				MinAge: minAge,
+				MaxAge: maxAge,
+				Gender: features.Gender(searchGender),
+				Radius: radius,
+			}
 			users, err := discService.FetchPotentialMatches(ctx, authUser.ID, filters)
 			if err != nil {
 				dto.SendErrorJsonResponse[string](w, logger, err.Error(), http.StatusBadRequest)
@@ -175,6 +189,9 @@ func HandleFetchPotentialMatches(
 					Name:   user.Name,
 					Gender: user.Gender,
 					Age:    time.Now().Year() - user.Dob.Year(),
+					DistanceFromMe: int(utils.DistanceBetween(
+						authUser.Latitude, authUser.Longitude,
+						user.Latitude, user.Longitude)),
 				}
 				usersResp = append(usersResp, userResponse)
 			}

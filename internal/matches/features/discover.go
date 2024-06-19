@@ -8,6 +8,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
 	"github.com/pkg/errors"
+	"github.com/uber/h3-go/v4"
 	"go.uber.org/zap"
 	"time"
 )
@@ -20,10 +21,13 @@ const (
 	OtherGender  Gender = "O"
 )
 
+var ErrInvalidFilterValues = errors.New("Invalid filter values.")
+
 type MatchFilter struct {
 	MinAge int
 	MaxAge int
 	Gender Gender
+	Radius int // In Kilometers
 }
 
 type DiscoverService struct {
@@ -44,6 +48,10 @@ func NewDiscoverService(
 	}
 }
 
+// FetchPotentialMatches fetches potential matches for the given user ID and filters.
+// It retrieves the authenticated user (userId), applies the filters, and returns a list of potential matches.
+// If the user is not found, it returns ErrUserNotFound.
+// The function uses the userRepo to retrieve matching users based on the provided filters.
 func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int64, filters MatchFilter) ([]models.User, error) {
 	authUser, err := d.userRepo.FindOne(ctx, data.UserWithID(userId))
 	if err != nil {
@@ -78,9 +86,21 @@ func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int6
 		opts = append(opts, data.UsersWithGender(string(filters.Gender)))
 	}
 
+	// If radius is passed add location based filter
+	if filters.Radius > 0 {
+		k := radiusToKRadius(float64(filters.Radius), d.config.H3Resolution)
+		nearByCells := h3.Cell(authUser.H3Index).GridDisk(k)
+		opts = append(opts, data.UsersWithinH3Indexes(nearByCells))
+	}
+
 	users, err := d.userRepo.FindAll(ctx, opts...)
 	if err != nil {
 		return nil, errors.Wrap(err, "fetch users failed")
 	}
 	return users, nil
+}
+
+// Convert the radius in KM to grid distance
+func radiusToKRadius(radius float64, res int) int {
+	return int(radius / (h3.HexagonEdgeLengthAvgKm(res) * 2))
 }

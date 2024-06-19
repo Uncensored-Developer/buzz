@@ -64,3 +64,8 @@ func (b *BunRepository[T]) Delete(ctx context.Context, model *T) error {
 	_, err := b.DB.NewDelete().Model(model).WherePK().Exec(ctx)
 	return err
 }
+
+func (b *BunRepository[T]) Update(ctx context.Context, model *T) error {
+	_, err := b.DB.NewUpdate().Model(model).WherePK().Returning("*").Exec(ctx)
+	return err
+}
