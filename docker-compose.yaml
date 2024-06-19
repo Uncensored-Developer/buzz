@@ -54,8 +54,8 @@ services:
     networks:
       - buzz_network
 
-  buzz_api:
-    container_name: buzz_api
+  api:
+    container_name: buzz
     restart: always
     build:
       context: .
