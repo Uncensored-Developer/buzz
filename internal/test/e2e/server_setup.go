@@ -51,12 +51,12 @@ func (s *TestServerSuite) StartUp() error {
 	}
 
 	// This is necessary for the config.LoadConfig to pick this from the environment variables
-	err = os.Setenv("DATABASE_URL", testDatabase.DSN)
+	err = os.Setenv("BUZZ_DATABASE_URL", testDatabase.DSN)
 	if err != nil {
 		return errors.Wrap(err, "set env failed")
 	}
 
-	err = os.Setenv("REDIS_URL", s.CacheDbContainer.DSN)
+	err = os.Setenv("BUZZ_REDIS_URL", s.CacheDbContainer.DSN)
 	if err != nil {
 		return errors.Wrap(err, "set env failed")
 	}
@@ -92,9 +92,9 @@ func (s *TestServerSuite) Shutdown() error {
 	s.ShutdownServerFunc()
 
 	// unset env variable and shutdown test database
-	err := os.Unsetenv("DATABASE_URL")
+	err := os.Unsetenv("BUZZ_DATABASE_URL")
 	if err != nil {
-		return errors.Wrap(err, "unset DATABASE_URL env failed")
+		return errors.Wrap(err, "unset BUZZ_DATABASE_URL env failed")
 	}
 
 	err = s.DbContainer.Shutdown()

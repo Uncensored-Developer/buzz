@@ -55,9 +55,9 @@ func (m *matchServiceTestSuite) SetupSuite() {
 	m.Require().NoError(err)
 
 	// This is necessary for the config.LoadConfig to pick this from the environment variables
-	err = os.Setenv("DATABASE_URL", m.testDatabase.DSN)
+	err = os.Setenv("BUZZ_DATABASE_URL", m.testDatabase.DSN)
 	m.Require().NoError(err)
-	err = os.Setenv("REDIS_URL", m.cacheDatabase.DSN)
+	err = os.Setenv("BUZZ_REDIS_URL", m.cacheDatabase.DSN)
 	m.Require().NoError(err)
 
 	cfg, err := config.LoadConfig()
@@ -76,21 +76,21 @@ func (m *matchServiceTestSuite) SetupSuite() {
 }
 
 // TearDownSuite tears down the test suite by performing the following actions:
-// 1. Unset the "DATABASE_URL" environment variable.
-// 2. Unset the "REDIS_URL" environment variable.
+// 1. Unset the "BUZZ_DATABASE_URL" environment variable.
+// 2. Unset the "BUZZ_REDIS_URL" environment variable.
 // 3. Shutdown the testDatabase container.
 // 4. Shutdown the cacheDatabase container.
 //
 // If any of the above actions fail, an error is logged using the logger.
 func (m *matchServiceTestSuite) TearDownSuite() {
 
-	err := os.Unsetenv("DATABASE_URL")
+	err := os.Unsetenv("BUZZ_DATABASE_URL")
 	if err != nil {
-		m.logger.Error("unset DATABASE_URL env failed", zap.Error(err))
+		m.logger.Error("unset BUZZ_DATABASE_URL env failed", zap.Error(err))
 	}
-	err = os.Unsetenv("REDIS_URL")
+	err = os.Unsetenv("BUZZ_REDIS_URL")
 	if err != nil {
-		m.logger.Error("unset REDIS_URL env failed", zap.Error(err))
+		m.logger.Error("unset BUZZ_REDIS_URL env failed", zap.Error(err))
 	}
 
 	err = m.testDatabase.Shutdown()

@@ -17,7 +17,7 @@ type TestCacheDatabase struct {
 
 func NewCacheDatabase(ctx context.Context, logger *zap.Logger) (*TestCacheDatabase, error) {
 	c, err := redis.RunContainer(ctx,
-		testcontainers.WithImage("redis:7.4-rc1-alpine"),
+		testcontainers.WithImage("redis:latest"),
 		redis.WithSnapshotting(10, 1),
 		redis.WithLogLevel(redis.LogLevelVerbose),
 	)

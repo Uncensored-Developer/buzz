@@ -19,6 +19,8 @@ All that's needed to setup and run this app is Golang and Docker installed local
 
 ---
 
+A few users  would be added to the database on startup, you can login with ``
+
 ### APIs
 On start up the app would run on [http://localhost:8003](http://localhost:8003)
 
@@ -34,7 +36,18 @@ This creates a random user with a default password of `password123`
 
 **RESPONSE**
 ```json
-
+{
+	"result": {
+		"id": 25,
+		"email": "bonniesatterfield@greenfelder.name",
+		"password": "77546b6a714655717144705547696e414a71485acbfdac6008f9cab4083784cbd1874f76618d2a97",
+		"name": "Asha Streich",
+		"gender": "M",
+		"age": 19,
+		"lat": 0,
+		"long": 0
+	}
+}
 ```
 
 ===================================

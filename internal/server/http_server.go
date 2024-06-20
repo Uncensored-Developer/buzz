@@ -54,6 +54,11 @@ func (s *Server) setupHandler(ctx context.Context) http.Handler {
 func (s *Server) Run(ctx context.Context) error {
 	srv := s.setupHandler(ctx)
 
+	if s.config.SeedUsers {
+		s.logger.Info("SEED USERS set.. Preloading users")
+		PreLoadUsers(ctx, s.config, s.logger)
+	}
+
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(s.config.Host, s.config.Port),
 		Handler: srv,
@@ -62,7 +67,6 @@ func (s *Server) Run(ctx context.Context) error {
 	go func() {
 		logMsg := fmt.Sprintf("Listening on %s", httpServer.Addr)
 		s.logger.Info(logMsg)
-		//log.Printf("Listening on %s\n", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 		}

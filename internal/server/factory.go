@@ -42,6 +42,5 @@ func InitializeServer() (*Server, error) {
 	matchService := features2.NewMatchService(userRepo, cacheManager, uow, cfg, zapLogger)
 	discoverService := features2.NewDiscoverService(userRepo, cfg, zapLogger)
 	profilesService := features.NewUserProfilesService(userRepo, cfg, zapLogger)
-
 	return NewServer(cfg, zapLogger, authService, matchService, discoverService, profilesService), err
 }
