@@ -19,7 +19,8 @@ All that's needed to setup and run this app is Golang and Docker installed local
 
 ---
 
-A few users  would be added to the database on startup, you can login with ``
+A few users  would be added to the database on startup, you can login with email `test.user@buzz.com` and
+password `password123`. It already has a few users located within a 100km distance.
 
 ### APIs
 On start up the app would run on [http://localhost:8003](http://localhost:8003)
@@ -152,11 +153,11 @@ Use to fetch potential matches based on age range, gender and radius
 
 **QUERY PARAMS:** `age_range`, `gender`, `distance_from`
 ```text
-age_range should follow the `{minimum age}-{maximum age}` e.g 18-30.
+age_range should follow the `{minimum age}-{maximum age}` e.g 18-30. Defaults to 18-60
 
 gender should be either M, F or 0 for male, female and others respectively.
 
-distance_from should be an integer representing the distance from user in Kilometers.
+distance_from should be an integer representing the distance from user in Kilometers. Defaults to 50
 ```
 
 **RESPONSE**
@@ -195,6 +196,7 @@ distance_from should be an integer representing the distance from user in Kilome
 * Minimum age for creating a profile is 18 years.
 * Maximum age is 60 years.
 * User location is stored as longitude and latitude.
+* The distance from users is a distance between 2 point on earth.
 * For a dating app we need to find users within a few kilometers radius, hence I used a resolution of 9 for H3 indexing which is a good balance between performance and precision.
 * Attractiveness is calculated by number of YES swipes on a user's profile.
 
