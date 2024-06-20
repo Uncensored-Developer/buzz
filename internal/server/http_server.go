@@ -45,7 +45,7 @@ func NewServer(
 func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	mux := http.NewServeMux()
 	var handler http.Handler = mux
-
+	handler = RequestLoggingMiddleWare(ctx, s.logger, handler)
 	// routes
 	addRoutes(ctx, mux, s.config, s.logger, s.authService, s.matchService, s.discService, s.profileService)
 	return handler

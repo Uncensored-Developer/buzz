@@ -23,13 +23,13 @@ func addRoutes(
 ) {
 	mux.Handle("/user/create", delivery.HandleUserCreate(ctx, logger, cfg, authService))
 	mux.Handle("/login", delivery.HandleUserLogin(ctx, logger, authService))
-	mux.Handle("/swipe", delivery.LoggedInOnly(
+	mux.Handle("/swipe", delivery.LoggedInUserOnlyMiddleware(
 		ctx, logger, authService,
 		delivery2.HandleUserSwipe(ctx, logger, matchService)))
-	mux.Handle("/discovery", delivery.LoggedInOnly(
+	mux.Handle("/discovery", delivery.LoggedInUserOnlyMiddleware(
 		ctx, logger, authService,
 		delivery2.HandleFetchPotentialMatches(ctx, logger, discService)))
-	mux.Handle("/user/update", delivery.LoggedInOnly(
+	mux.Handle("/user/update", delivery.LoggedInUserOnlyMiddleware(
 		ctx, logger, authService,
 		delivery.HandleUpdateProfileLocation(ctx, logger, profilesService)))
 	mux.Handle("/health", HandleHealthCheck(logger))

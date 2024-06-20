@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-func LoggedInOnly(
+func LoggedInUserOnlyMiddleware(
 	ctx context.Context,
 	logger *zap.Logger,
 	authService *features.AuthenticationService,
-	h http.Handler,
+	next http.Handler,
 ) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +45,7 @@ func LoggedInOnly(
 				return
 			}
 			c := context.WithValue(r.Context(), "user", user)
-			h.ServeHTTP(w, r.WithContext(c))
+			next.ServeHTTP(w, r.WithContext(c))
 		},
 	)
 }
