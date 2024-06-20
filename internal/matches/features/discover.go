@@ -5,6 +5,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
+	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
 	"github.com/pkg/errors"
@@ -92,6 +93,11 @@ func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int6
 		nearByCells := h3.Cell(authUser.H3Index).GridDisk(k)
 		opts = append(opts, data.UsersWithinH3Indexes(nearByCells))
 	}
+
+	opts = append(opts,
+		bun_mysql.OrderBy("likes_count", "DESC"),
+		bun_mysql.Limit(10),
+	)
 
 	users, err := d.userRepo.FindAll(ctx, opts...)
 	if err != nil {

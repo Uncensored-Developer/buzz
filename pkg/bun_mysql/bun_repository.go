@@ -3,6 +3,7 @@ package bun_mysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
@@ -70,4 +71,16 @@ func (b *BunRepository[T]) Delete(ctx context.Context, model *T) error {
 func (b *BunRepository[T]) Update(ctx context.Context, model *T) error {
 	_, err := b.DB.NewUpdate().Model(model).WherePK().Returning("*").Exec(ctx)
 	return err
+}
+
+func Limit(count int) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Limit(count)
+	}
+}
+
+func OrderBy(field, value string) repository.SelectCriteria {
+	return func(query *bun.SelectQuery) *bun.SelectQuery {
+		return query.Order(fmt.Sprintf("%s %s", field, value))
+	}
 }

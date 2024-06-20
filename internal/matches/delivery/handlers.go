@@ -164,10 +164,8 @@ func HandleFetchPotentialMatches(
 
 			distance := r.URL.Query().Get("distance_from")
 			radius, err := strconv.Atoi(distance)
-			if err != nil {
-				var msg = map[string]string{"gender": "Invalid distance_from value"}
-				dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
-				return
+			if radius == 0 {
+				radius = 50 // Set to a default of 10KM
 			}
 
 			filters := features.MatchFilter{
