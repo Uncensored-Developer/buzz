@@ -165,7 +165,7 @@ func HandleFetchPotentialMatches(
 			distance := r.URL.Query().Get("distance_from")
 			radius, err := strconv.Atoi(distance)
 			if radius == 0 {
-				radius = 50 // Set to a default of 10KM
+				radius = 50 // Set to a default of 50KM
 			}
 
 			filters := features.MatchFilter{
@@ -174,6 +174,7 @@ func HandleFetchPotentialMatches(
 				Gender: features.Gender(searchGender),
 				Radius: radius,
 			}
+
 			users, err := discService.FetchPotentialMatches(ctx, authUser.ID, filters)
 			if err != nil {
 				dto.SendErrorJsonResponse[string](w, logger, err.Error(), http.StatusBadRequest)

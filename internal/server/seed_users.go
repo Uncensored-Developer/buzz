@@ -4,9 +4,11 @@ import (
 	"context"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
+	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/db"
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/pkg/errors"
 	"github.com/uber/h3-go/v4"
 	"go.uber.org/zap"
 	"time"
@@ -69,11 +71,10 @@ func PreLoadUsers(
 		logger.Error("could make db connection", zap.Error(err))
 		return
 	}
-
 	userRepo := data.NewUserRepository(bunDb)
 	for _, user := range testUsers {
 		_, err := userRepo.FindOne(ctx, data.UserWithEmail(user.Email))
-		if err == nil {
+		if errors.Is(err, bun_mysql.ErrRowNotFound) {
 			err = userRepo.Save(ctx, &user)
 			if err != nil {
 				logger.Error("could not create users", zap.Error(err))
@@ -81,14 +82,13 @@ func PreLoadUsers(
 		}
 	}
 
-	var emails []string
 	for _, user := range testUsers {
-		emails = append(emails, user.Email)
+		gotUser, _ := userRepo.FindOne(ctx, data.UserWithEmail(user.Email))
 
 		latLng := h3.NewLatLng(user.Latitude, user.Latitude)
 		cell := h3.LatLngToCell(latLng, cfg.H3Resolution)
-		user.H3Index = int64(cell)
-		err := userRepo.Update(ctx, &user)
+		gotUser.H3Index = int64(cell)
+		err := userRepo.Update(ctx, &gotUser)
 		if err != nil {
 			logger.Error("could not update H3 index", zap.Error(err))
 		}

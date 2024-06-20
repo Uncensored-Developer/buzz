@@ -8,6 +8,7 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/hash"
 	"github.com/pkg/errors"
+	"github.com/uber/h3-go/v4"
 	"go.uber.org/zap"
 	"time"
 )
@@ -58,6 +59,9 @@ func (a *AuthenticationService) SignUp(
 		return models.User{}, errors.Wrap(err, "password hash failed")
 	}
 
+	latLng := h3.NewLatLng(lat, long)
+	cell := h3.LatLngToCell(latLng, a.config.H3Resolution)
+
 	newUser := &models.User{
 		Email:     email,
 		Password:  hashedPassword,
@@ -66,6 +70,7 @@ func (a *AuthenticationService) SignUp(
 		Dob:       dob,
 		Latitude:  lat,
 		Longitude: long,
+		H3Index:   int64(cell),
 	}
 	err = a.userRepo.Save(ctx, newUser)
 	if err != nil {

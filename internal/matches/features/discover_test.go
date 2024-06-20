@@ -187,6 +187,30 @@ func (d *discoverServiceTestSuite) TestFetchPotentialMatches_WithRadius() {
 	d.Assert().ElementsMatch(wantEmails, gotEmails)
 }
 
+func (d *discoverServiceTestSuite) TestFetchPotentialMatches_AllFilters() {
+	testUsers, teardown, err := setupUsers(d.ctx, d.cfg, d.bunDb, d.logger)
+	d.Require().NoError(err)
+	defer teardown()
+
+	filters := features.MatchFilter{
+		MinAge: 18,
+		MaxAge: 60,
+		Gender: "M",
+		Radius: 100,
+	}
+	wantCount := 2
+	wantEmails := []string{"user2@buzz.com", "user3@buzz.com"}
+	users, err := d.discoverService.FetchPotentialMatches(d.ctx, testUsers[0].ID, filters)
+
+	var gotEmails []string
+	for _, user := range users {
+		gotEmails = append(gotEmails, user.Email)
+	}
+	d.Require().NoError(err)
+	d.Assert().Equal(wantCount, len(users))
+	d.Assert().ElementsMatch(wantEmails, gotEmails)
+}
+
 func TestDiscoverService(t *testing.T) {
 	suite.Run(t, new(discoverServiceTestSuite))
 }
