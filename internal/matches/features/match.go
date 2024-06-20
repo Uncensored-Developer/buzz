@@ -3,6 +3,7 @@ package features
 import (
 	"context"
 	"fmt"
+	"github.com/Uncensored-Developer/buzz/internal/datastore"
 	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
 	models2 "github.com/Uncensored-Developer/buzz/internal/matches/models"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
@@ -23,23 +24,23 @@ const (
 
 type MatchService struct {
 	userRepo     data.IUserRepository
-	matchesRepo  data2.IMatchesRepository
 	cacheManager repository.ISimpleCacheManager
+	uow          datastore.IUnitOfWork
 	config       *config.Config
 	logger       *zap.Logger
 }
 
 func NewMatchService(
 	userRepo data.IUserRepository,
-	matchesRepo data2.IMatchesRepository,
 	cacheManager repository.ISimpleCacheManager,
+	uow datastore.IUnitOfWork,
 	cfg *config.Config,
 	logger *zap.Logger,
 ) *MatchService {
 	return &MatchService{
 		userRepo:     userRepo,
-		matchesRepo:  matchesRepo,
 		cacheManager: cacheManager,
+		uow:          uow,
 		config:       cfg,
 		logger:       logger,
 	}
@@ -76,62 +77,125 @@ func (m *MatchService) Swipe(
 	// e.g. user 1 likes user 2 = `1.YES.2`
 	// e.g. user 3 passes user 5 = `3.NO.5`
 	swipeActionTemplate := "%d." + string(action) + ".%d"
-	if action == YesAction {
-		var gotMatch models2.Match
-		// Check if swipedUser has previously liked user's profile
-		getKey := fmt.Sprintf(swipeActionTemplate, swipedUserID, swiperUserID)
-		_, err := m.cacheManager.Get(ctx, getKey)
-		if err != nil {
-			// No match yet, just save to cache database
-			saveKey := fmt.Sprintf(swipeActionTemplate, swiperUserID, swipedUserID)
-			cacheDuration := time.Hour * 24 * 30 // 30 days
-			err = m.cacheManager.Set(ctx, saveKey, string(action), cacheDuration)
+
+	var gotMatch models2.Match
+	err = m.uow.Do(ctx, func(store datastore.IUnitOfWorkDatastore) error {
+		if action == YesAction {
+			// Check if swipedUser has previously liked user's profile
+			getKey := fmt.Sprintf(swipeActionTemplate, swipedUserID, swiperUserID)
+			_, err := m.cacheManager.Get(ctx, getKey)
 			if err != nil {
-				m.logger.Error("cache save failed", zap.Error(err))
-				return models2.Match{}, errors.Wrap(err, "cache save failed")
-			}
-			m.logger.Info("swipe action saved",
-				zap.Int64("userId", swiperUserID),
-				zap.String("action", string(action)),
-				zap.Int64("swipedUserId", swipedUserID),
-			)
-		} else {
-			// Match found, save to matches repository
-			match := &models2.Match{
-				UserOneID: authUser.ID,
-				UserTwoID: swipedUser.ID,
-			}
-			err := m.matchesRepo.Save(ctx, match)
-			if err != nil {
-				m.logger.Error("match save failed", zap.Error(err))
-				return models2.Match{}, errors.Wrap(err, "match save failed")
+				// No match yet, just save to cache database
+				saveKey := fmt.Sprintf(swipeActionTemplate, swiperUserID, swipedUserID)
+				cacheDuration := time.Hour * 24 * 30 // 30 days
+				err = m.cacheManager.Set(ctx, saveKey, string(action), cacheDuration)
+				if err != nil {
+					m.logger.Error("cache save failed", zap.Error(err))
+					return errors.Wrap(err, "cache save failed")
+				}
+				m.logger.Info("swipe action saved",
+					zap.Int64("userId", swiperUserID),
+					zap.String("action", string(action)),
+					zap.Int64("swipedUserId", swipedUserID),
+				)
+			} else {
+				// Match found, save to matches repository
+				match := &models2.Match{
+					UserOneID: authUser.ID,
+					UserTwoID: swipedUser.ID,
+				}
+				err := store.MatchesRepository().Save(ctx, match)
+				if err != nil {
+					m.logger.Error("match save failed", zap.Error(err))
+					return errors.Wrap(err, "match save failed")
+				}
+
+				gM, _ := store.MatchesRepository().FindOne(ctx,
+					data2.MatchWithUserOneID(match.UserOneID),
+					data2.MatchWithUserTwoID(match.UserTwoID),
+				)
+				m.logger.Info("match occured",
+					zap.Int64("matchID", gotMatch.ID),
+				)
+
+				// Delete swipe action from cache database
+				err = m.cacheManager.Delete(ctx, getKey)
+				if err != nil {
+					m.logger.Error("swipe action delete failed", zap.Error(err))
+					return errors.Wrap(err, "swipe action delete failed")
+				}
+				gotMatch = gM
 			}
 
-			gM, _ := m.matchesRepo.FindOne(ctx,
-				data2.MatchWithUserOneID(match.UserOneID),
-				data2.MatchWithUserTwoID(match.UserTwoID),
-			)
-			m.logger.Info("match occured",
-				zap.Int64("matchID", gotMatch.ID),
-			)
-
-			// Delete swipe action from cache database
-			err = m.cacheManager.Delete(ctx, getKey)
+			// Increment likes count for swiped user
+			err = store.UsersRepository().IncrementLikes(ctx, swipedUserID, 1)
 			if err != nil {
-				m.logger.Error("swipe action delete failed", zap.Error(err))
-				return models2.Match{}, errors.Wrap(err, "swipe action delete failed")
+				m.logger.Error("increment likes failed", zap.Error(err))
+				return errors.Wrap(err, "increment likes failed")
 			}
-			gotMatch = gM
+			return nil
 		}
-
-		// Increment likes count for swiped user
-		err = m.userRepo.IncrementLikes(ctx, swipedUserID, 1)
-		if err != nil {
-			m.logger.Error("increment likes failed", zap.Error(err))
-			return models2.Match{}, errors.Wrap(err, "increment likes failed")
-		}
-		return gotMatch, nil
+		return nil
+	})
+	if err != nil {
+		return models2.Match{}, errors.Wrap(err, "handle swipe failed")
 	}
+	//if action == YesAction {
+	//	var gotMatch models2.Match
+	//	// Check if swipedUser has previously liked user's profile
+	//	getKey := fmt.Sprintf(swipeActionTemplate, swipedUserID, swiperUserID)
+	//	_, err := m.cacheManager.Get(ctx, getKey)
+	//	if err != nil {
+	//		// No match yet, just save to cache database
+	//		saveKey := fmt.Sprintf(swipeActionTemplate, swiperUserID, swipedUserID)
+	//		cacheDuration := time.Hour * 24 * 30 // 30 days
+	//		err = m.cacheManager.Set(ctx, saveKey, string(action), cacheDuration)
+	//		if err != nil {
+	//			m.logger.Error("cache save failed", zap.Error(err))
+	//			return models2.Match{}, errors.Wrap(err, "cache save failed")
+	//		}
+	//		m.logger.Info("swipe action saved",
+	//			zap.Int64("userId", swiperUserID),
+	//			zap.String("action", string(action)),
+	//			zap.Int64("swipedUserId", swipedUserID),
+	//		)
+	//	} else {
+	//		// Match found, save to matches repository
+	//		match := &models2.Match{
+	//			UserOneID: authUser.ID,
+	//			UserTwoID: swipedUser.ID,
+	//		}
+	//		err := m.matchesRepo.Save(ctx, match)
+	//		if err != nil {
+	//			m.logger.Error("match save failed", zap.Error(err))
+	//			return models2.Match{}, errors.Wrap(err, "match save failed")
+	//		}
+	//
+	//		gM, _ := m.matchesRepo.FindOne(ctx,
+	//			data2.MatchWithUserOneID(match.UserOneID),
+	//			data2.MatchWithUserTwoID(match.UserTwoID),
+	//		)
+	//		m.logger.Info("match occured",
+	//			zap.Int64("matchID", gotMatch.ID),
+	//		)
+	//
+	//		// Delete swipe action from cache database
+	//		err = m.cacheManager.Delete(ctx, getKey)
+	//		if err != nil {
+	//			m.logger.Error("swipe action delete failed", zap.Error(err))
+	//			return models2.Match{}, errors.Wrap(err, "swipe action delete failed")
+	//		}
+	//		gotMatch = gM
+	//	}
+	//
+	//	// Increment likes count for swiped user
+	//	err = m.userRepo.IncrementLikes(ctx, swipedUserID, 1)
+	//	if err != nil {
+	//		m.logger.Error("increment likes failed", zap.Error(err))
+	//		return models2.Match{}, errors.Wrap(err, "increment likes failed")
+	//	}
+	//	return gotMatch, nil
+	//}
 	// Handle other swipe accounts like NO, SUPER LIKE etc.
-	return models2.Match{}, nil
+	return gotMatch, nil
 }

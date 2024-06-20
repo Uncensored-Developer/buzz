@@ -3,6 +3,7 @@ package features_test
 import (
 	"context"
 	"fmt"
+	"github.com/Uncensored-Developer/buzz/internal/datastore"
 	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
 	"github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/test/e2e"
@@ -68,8 +69,9 @@ func (m *matchServiceTestSuite) SetupSuite() {
 	m.userRepo = data.NewUserRepository(bunDb)
 	m.matchesRepo = data2.NewMatchesRepository(bunDb)
 	m.cacheManager = cache.NewRedisManager(cfg)
+	uow := datastore.NewUnitOfWorkDatastore(bunDb)
 
-	m.matchService = features.NewMatchService(m.userRepo, m.matchesRepo, m.cacheManager, cfg, m.logger)
+	m.matchService = features.NewMatchService(m.userRepo, m.cacheManager, uow, cfg, m.logger)
 
 }
 

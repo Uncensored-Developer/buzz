@@ -24,12 +24,14 @@ func HandleUserCreate(
 ) http.Handler {
 
 	type userResponse struct {
-		Id       int64  `json:"id"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		Name     string `json:"name"`
-		Gender   string `json:"gender"`
-		Age      int    `json:"age"`
+		Id       int64   `json:"id"`
+		Email    string  `json:"email"`
+		Password string  `json:"password"`
+		Name     string  `json:"name"`
+		Gender   string  `json:"gender"`
+		Age      int     `json:"age"`
+		Lat      float64 `json:"lat"`
+		Long     float64 `json:"long"`
 	}
 
 	// HTTP response type for user signup
@@ -72,6 +74,8 @@ func HandleUserCreate(
 						Name:     user.Name,
 						Gender:   user.Gender,
 						Age:      age,
+						Lat:      user.Latitude,
+						Long:     user.Longitude,
 					},
 				}
 				err := dto.Encode[response](w, 201, res)

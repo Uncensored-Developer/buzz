@@ -46,8 +46,6 @@ func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	mux := http.NewServeMux()
 	var handler http.Handler = mux
 
-	// Middleware
-
 	// routes
 	addRoutes(ctx, mux, s.config, s.logger, s.authService, s.matchService, s.discService, s.profileService)
 	return handler

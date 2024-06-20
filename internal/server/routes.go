@@ -29,7 +29,7 @@ func addRoutes(
 	mux.Handle("/discovery", delivery.LoggedInOnly(
 		ctx, logger, authService,
 		delivery2.HandleFetchPotentialMatches(ctx, logger, discService)))
-	mux.Handle("/update", delivery.LoggedInOnly(
+	mux.Handle("/user/update", delivery.LoggedInOnly(
 		ctx, logger, authService,
 		delivery.HandleUpdateProfileLocation(ctx, logger, profilesService)))
 	mux.Handle("/health", HandleHealthCheck(logger))
