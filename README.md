@@ -188,8 +188,8 @@ distance_from should be an integer representing the distance from user in Kilome
 
 ### GOING FORWARD
 * More refactors to be done (probably introduce a dependency injection framework to properly handle dependencies).
-* More extensive tests.
-* Add test coverage.
+* More extensive tests and test coverage.
+* Refactor tests setup process across most tests. Currently similar setup logic is repeated in several places. (FIX THAT).
 * Handle NO swipes on user profiles, Probably store them to exclude the involved profiles from being shown to the user in future.
 * Build separate service that regularly aggregates potential matches for active users based on more profile info, activities and other statistics (might include some ML).
 * Add Super Like Feature that ranks profile to the top of the list of potential matches.
