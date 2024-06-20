@@ -46,7 +46,7 @@ func (d *discoverServiceTestSuite) SetupSuite() {
 	d.Require().NoError(err)
 
 	// This is necessary for the config.LoadConfig to pick this from the environment variables
-	err = os.Setenv("DATABASE_URL", d.testDatabase.DSN)
+	err = os.Setenv("BUZZ_DATABASE_URL", d.testDatabase.DSN)
 	d.Require().NoError(err)
 
 	cfg, err := config.LoadConfig()
@@ -102,9 +102,9 @@ func (d *discoverServiceTestSuite) SetupSuite() {
 }
 
 func (d *discoverServiceTestSuite) TearDownSuite() {
-	err := os.Unsetenv("DATABASE_URL")
+	err := os.Unsetenv("BUZZ_DATABASE_URL")
 	if err != nil {
-		d.logger.Error("unset DATABASE_URL env failed", zap.Error(err))
+		d.logger.Error("unset BUZZ_DATABASE_URL env failed", zap.Error(err))
 	}
 
 	err = d.testDatabase.Shutdown()

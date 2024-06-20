@@ -59,11 +59,13 @@ func (a *AuthenticationService) SignUp(
 	}
 
 	newUser := &models.User{
-		Email:    email,
-		Password: hashedPassword,
-		Name:     name,
-		Gender:   gender,
-		Dob:      dob,
+		Email:     email,
+		Password:  hashedPassword,
+		Name:      name,
+		Gender:    gender,
+		Dob:       dob,
+		Latitude:  lat,
+		Longitude: long,
 	}
 	err = a.userRepo.Save(ctx, newUser)
 	if err != nil {

@@ -32,7 +32,7 @@ func (r *redisManagerTestSuite) SetupSuite() {
 	r.redisDatabase = redisContainer
 	r.logger = zapLogger
 
-	err = os.Setenv("REDIS_URL", redisContainer.DSN)
+	err = os.Setenv("BUZZ_REDIS_URL", redisContainer.DSN)
 	r.Require().NoError(err)
 
 	r.redisURL = redisContainer.DSN
@@ -49,9 +49,9 @@ func (r *redisManagerTestSuite) SetupSuite() {
 }
 
 func (r *redisManagerTestSuite) TearDownSuite() {
-	err := os.Unsetenv("REDIS_URL")
+	err := os.Unsetenv("BUZZ_REDIS_URL")
 	if err != nil {
-		r.logger.Error("unset REDIS_URL env failed", zap.Error(err))
+		r.logger.Error("unset BUZZ_REDIS_URL env failed", zap.Error(err))
 	}
 	err = r.redisDatabase.Shutdown()
 	if err != nil {

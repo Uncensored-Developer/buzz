@@ -1,7 +1,7 @@
 package server
 
 import (
-	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
+	"github.com/Uncensored-Developer/buzz/internal/datastore"
 	features2 "github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
@@ -30,17 +30,17 @@ func InitializeServer() (*Server, error) {
 
 	bunDB, err := db.Connect(cfg.DatabaseURL)
 	userRepo := data.NewUserRepository(bunDB)
-	matchesRepo := data2.NewMatchesRepository(bunDB)
 	if err != nil {
 		return nil, errors.Wrap(err, "database connection failed")
 	}
 
+	uow := datastore.NewUnitOfWorkDatastore(bunDB)
+
 	cacheManager := cache.NewRedisManager(cfg)
 
 	authService := features.NewAuthenticationService(passwordHasher, manager, userRepo, cfg, zapLogger)
-	matchService := features2.NewMatchService(userRepo, matchesRepo, cacheManager, cfg, zapLogger)
+	matchService := features2.NewMatchService(userRepo, cacheManager, uow, cfg, zapLogger)
 	discoverService := features2.NewDiscoverService(userRepo, cfg, zapLogger)
 	profilesService := features.NewUserProfilesService(userRepo, cfg, zapLogger)
-
 	return NewServer(cfg, zapLogger, authService, matchService, discoverService, profilesService), err
 }

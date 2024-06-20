@@ -67,14 +67,15 @@ services:
       - mysql_db_go_migrate
       - redis
     environment:
-      - HTTP_HOST=0.0.0.0
-      - HTTP_PORT=8003
-      - DEBUG=true
-      - DATABASE_URL=mysql://user:password@mysql_db:3306/buzz
-      - REDIS_URL=redis://redis:6379
-      - JWT_KEY=wTkjqFUqqDpUGinAJqHZ
-      - PASSWORD_HASHER_SALT=wTkjqFUqqDpUGinAJqHZ
-      - FAKE_USER_PASSWORD=password123
+      - BUZZ_HTTP_HOST=0.0.0.0
+      - BUZZ_HTTP_PORT=8003
+      - BUZZ_DEBUG=true
+      - BUZZ_DATABASE_URL=mysql://user:password@mysql_db:3306/buzz
+      - BUZZ_REDIS_URL=redis://redis:6379
+      - BUZZ_JWT_KEY=wTkjqFUqqDpUGinAJqHZ
+      - BUZZ_PASSWORD_HASHER_SALT=wTkjqFUqqDpUGinAJqHZ
+      - BUZZ_FAKE_USER_PASSWORD=password123
+      - BUZZ_SEED_USERS=true
     networks:
       - buzz_network
 

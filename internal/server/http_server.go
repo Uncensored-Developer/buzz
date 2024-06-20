@@ -45,9 +45,7 @@ func NewServer(
 func (s *Server) setupHandler(ctx context.Context) http.Handler {
 	mux := http.NewServeMux()
 	var handler http.Handler = mux
-
-	// Middleware
-
+	handler = RequestLoggingMiddleWare(ctx, s.logger, handler)
 	// routes
 	addRoutes(ctx, mux, s.config, s.logger, s.authService, s.matchService, s.discService, s.profileService)
 	return handler
@@ -55,6 +53,11 @@ func (s *Server) setupHandler(ctx context.Context) http.Handler {
 
 func (s *Server) Run(ctx context.Context) error {
 	srv := s.setupHandler(ctx)
+
+	if s.config.SeedUsers {
+		s.logger.Info("SEED USERS set.. Preloading users")
+		PreLoadUsers(ctx, s.config, s.logger)
+	}
 
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(s.config.Host, s.config.Port),
@@ -64,7 +67,6 @@ func (s *Server) Run(ctx context.Context) error {
 	go func() {
 		logMsg := fmt.Sprintf("Listening on %s", httpServer.Addr)
 		s.logger.Info(logMsg)
-		//log.Printf("Listening on %s\n", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 		}

@@ -1,6 +1,8 @@
 package data
 
 import (
+	"context"
+	"fmt"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
@@ -11,10 +13,25 @@ import (
 
 type IUserRepository interface {
 	repository.IRepository[models.User]
+	IncrementLikes(ctx context.Context, id int64, value int) error
 }
 
 func NewUserRepository(db bun.IDB) IUserRepository {
-	return bun_mysql.NewBunRepository[models.User](db)
+	return NewUserBunRepository(db)
+}
+
+type UserBunRepository struct {
+	bun_mysql.BunRepository[models.User]
+}
+
+func NewUserBunRepository(db bun.IDB) *UserBunRepository {
+	return &UserBunRepository{bun_mysql.BunRepository[models.User]{DB: db}}
+}
+
+func (b *UserBunRepository) IncrementLikes(ctx context.Context, id int64, value int) error {
+	stmt := fmt.Sprintf("UPDATE users SET likes_count = likes_count + %d WHERE id = ?", value)
+	_, err := b.DB.ExecContext(ctx, stmt, id)
+	return err
 }
 
 func UserWithEmail(email string) repository.SelectCriteria {

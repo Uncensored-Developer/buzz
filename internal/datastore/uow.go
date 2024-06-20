@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"database/sql"
+	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/uptrace/bun"
 )
@@ -12,6 +13,7 @@ import (
 // All data changes done will be executed in a database transaction
 type IUnitOfWorkDatastore interface {
 	UsersRepository() data.IUserRepository
+	MatchesRepository() data2.IMatchesRepository
 }
 
 type UnitOfWorkBlock func(store IUnitOfWorkDatastore) error
@@ -21,11 +23,16 @@ type IUnitOfWork interface {
 }
 
 type unitOfWorkDataStore struct {
-	usersRepository data.IUserRepository
+	usersRepository   data.IUserRepository
+	matchesRepository data2.IMatchesRepository
 }
 
 func (u *unitOfWorkDataStore) UsersRepository() data.IUserRepository {
 	return u.usersRepository
+}
+
+func (u *unitOfWorkDataStore) MatchesRepository() data2.IMatchesRepository {
+	return u.matchesRepository
 }
 
 type unitOfWork struct {
@@ -39,7 +46,8 @@ func NewUnitOfWorkDatastore(db *bun.DB) IUnitOfWork {
 func (u *unitOfWork) Do(ctx context.Context, fn UnitOfWorkBlock) error {
 	return u.conn.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		s := &unitOfWorkDataStore{
-			usersRepository: data.NewUserRepository(tx),
+			usersRepository:   data.NewUserRepository(tx),
+			matchesRepository: data2.NewMatchesRepository(tx),
 		}
 		return fn(s)
 	})
