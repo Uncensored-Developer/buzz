@@ -98,7 +98,7 @@ func TestUnitOfWork(t *testing.T) {
 			}
 		}()
 
-		err = uow.Do(ctx, func(store datastore.IUnitOfWorkDatastore) error {
+		uow.Do(ctx, func(store datastore.IUnitOfWorkDatastore) error {
 			err := store.UsersRepository().Save(ctx, user)
 			require.NoError(t, err)
 
@@ -142,7 +142,7 @@ func TestUnitOfWork(t *testing.T) {
 			}
 		}()
 
-		err = uow.Do(ctx, func(store datastore.IUnitOfWorkDatastore) error {
+		uow.Do(ctx, func(store datastore.IUnitOfWorkDatastore) error {
 			err := store.UsersRepository().Save(ctx, user)
 			require.NoError(t, err)
 

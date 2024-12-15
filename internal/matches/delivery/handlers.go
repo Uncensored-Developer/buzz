@@ -88,7 +88,6 @@ func HandleUserSwipe(
 				logger.Error("could not encode success response",
 					zap.Error(err))
 			}
-			return
 		},
 	)
 }
@@ -163,7 +162,7 @@ func HandleFetchPotentialMatches(
 			}
 
 			distance := r.URL.Query().Get("distance_from")
-			radius, err := strconv.Atoi(distance)
+			radius, _ := strconv.Atoi(distance)
 			if radius == 0 {
 				radius = 50 // Set to a default of 50KM
 			}
@@ -201,7 +200,6 @@ func HandleFetchPotentialMatches(
 				logger.Error("could not encode success response",
 					zap.Error(err))
 			}
-			return
 		},
 	)
 }

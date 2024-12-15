@@ -143,7 +143,6 @@ func HandleUserLogin(
 				logger.Error("could not encode success response",
 					zap.Error(err))
 			}
-			return
 		},
 	)
 }
