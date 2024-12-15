@@ -2,6 +2,7 @@ package features
 
 import (
 	"context"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/config"

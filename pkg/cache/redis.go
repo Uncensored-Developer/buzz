@@ -3,11 +3,12 @@ package cache
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
-	"sync"
-	"time"
 )
 
 const KeyPrefix = "BUZZ_APP_"
@@ -16,8 +17,10 @@ type RedisManager struct {
 	client *redis.Client
 }
 
-var singleton *RedisManager
-var once sync.Once
+var (
+	singleton *RedisManager
+	once      sync.Once
+)
 
 func NewRedisManager(cfg *config.Config) *RedisManager {
 	once.Do(func() {

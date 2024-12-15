@@ -2,13 +2,14 @@ package features
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/test/e2e"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"testing"
-	"time"
 )
 
 type userLoginTestSuite struct {

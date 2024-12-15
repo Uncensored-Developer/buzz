@@ -2,6 +2,10 @@ package features_test
 
 import (
 	"context"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
@@ -16,9 +20,6 @@ import (
 	"github.com/uber/h3-go/v4"
 	"github.com/uptrace/bun"
 	"go.uber.org/zap"
-	"os"
-	"testing"
-	"time"
 )
 
 type discoverServiceTestSuite struct {
@@ -114,7 +115,6 @@ func (d *discoverServiceTestSuite) TearDownSuite() {
 }
 
 func (d *discoverServiceTestSuite) TestFetchPotentialMatches_NoRadius() {
-
 	testCase := map[string]struct {
 		filter        features.MatchFilter
 		expectedErr   error

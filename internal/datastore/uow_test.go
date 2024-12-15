@@ -3,6 +3,9 @@ package datastore_test
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/datastore"
 	models2 "github.com/Uncensored-Developer/buzz/internal/matches/models"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
@@ -14,8 +17,6 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestUnitOfWork(t *testing.T) {

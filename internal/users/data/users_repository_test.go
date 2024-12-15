@@ -2,15 +2,16 @@ package data
 
 import (
 	"context"
+	"sync"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/db"
 	"github.com/Uncensored-Developer/buzz/pkg/migrate"
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"sync"
-	"testing"
-	"time"
 )
 
 // TestUserRepository_IncrementLikes is a test function to increment the LikesCount of a user in the UserRepository.

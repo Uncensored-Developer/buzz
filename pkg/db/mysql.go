@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+
 	"github.com/Uncensored-Developer/buzz/pkg/utils"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"

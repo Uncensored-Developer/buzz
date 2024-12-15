@@ -3,6 +3,8 @@ package features
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/datastore"
 	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
 	models2 "github.com/Uncensored-Developer/buzz/internal/matches/models"
@@ -12,7 +14,6 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"time"
 )
 
 type SwipeAction string

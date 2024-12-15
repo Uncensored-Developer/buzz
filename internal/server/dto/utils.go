@@ -2,9 +2,10 @@ package dto
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 // DecodeValid decodes the request body into a value of type T and returns an error if the decoding fails.

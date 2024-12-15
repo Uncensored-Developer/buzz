@@ -3,6 +3,10 @@ package features_test
 import (
 	"context"
 	"fmt"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/datastore"
 	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
 	"github.com/Uncensored-Developer/buzz/internal/matches/features"
@@ -19,9 +23,6 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"os"
-	"testing"
-	"time"
 )
 
 type matchServiceTestSuite struct {
@@ -72,7 +73,6 @@ func (m *matchServiceTestSuite) SetupSuite() {
 	uow := datastore.NewUnitOfWorkDatastore(bunDb)
 
 	m.matchService = features.NewMatchService(m.userRepo, m.cacheManager, uow, cfg, m.logger)
-
 }
 
 // TearDownSuite tears down the test suite by performing the following actions:
@@ -83,7 +83,6 @@ func (m *matchServiceTestSuite) SetupSuite() {
 //
 // If any of the above actions fail, an error is logged using the logger.
 func (m *matchServiceTestSuite) TearDownSuite() {
-
 	err := os.Unsetenv("BUZZ_DATABASE_URL")
 	if err != nil {
 		m.logger.Error("unset BUZZ_DATABASE_URL env failed", zap.Error(err))

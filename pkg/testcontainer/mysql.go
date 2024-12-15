@@ -3,16 +3,19 @@ package testcontainer
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	"go.uber.org/zap"
-	"strings"
 )
 
-const DbUsername = "user"
-const DbPassword = "password"
-const DbName = "test_buzz"
+const (
+	DbUsername = "user"
+	DbPassword = "password"
+	DbName     = "test_buzz"
+)
 
 type TestDatabase struct {
 	container testcontainers.Container

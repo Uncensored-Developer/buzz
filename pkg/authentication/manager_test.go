@@ -1,12 +1,13 @@
 package authentication_test
 
 import (
-	"github.com/Uncensored-Developer/buzz/pkg/authentication"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/Uncensored-Developer/buzz/pkg/authentication"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestManager is a test function that tests the functionality of the TestManager.

@@ -3,6 +3,9 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/server"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/logger"
@@ -10,8 +13,6 @@ import (
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"os"
-	"time"
 )
 
 // TestServerSuite represents utilities to ensure proper server setup for e2e tests

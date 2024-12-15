@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"database/sql"
+
 	data2 "github.com/Uncensored-Developer/buzz/internal/matches/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/uptrace/bun"

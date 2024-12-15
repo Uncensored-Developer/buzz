@@ -2,6 +2,7 @@ package testcontainer
 
 import (
 	"context"
+
 	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/redis"

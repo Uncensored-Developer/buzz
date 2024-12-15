@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	features2 "github.com/Uncensored-Developer/buzz/internal/matches/features"
-	"github.com/Uncensored-Developer/buzz/internal/users/features"
-	"github.com/Uncensored-Developer/buzz/pkg/config"
-	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"os"
 	"sync"
 	"time"
+
+	features2 "github.com/Uncensored-Developer/buzz/internal/matches/features"
+	"github.com/Uncensored-Developer/buzz/internal/users/features"
+	"github.com/Uncensored-Developer/buzz/pkg/config"
+	"go.uber.org/zap"
 )
 
 type Server struct {

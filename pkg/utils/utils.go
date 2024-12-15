@@ -2,10 +2,11 @@ package utils
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"math"
 	"net/url"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 func ConvertDatabaseUrlToDSN(dbURL string) (string, error) {
