@@ -2,13 +2,14 @@ package e2e
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"net/http"
-	"time"
 )
 
 var ErrEndpointTimeout = errors.New("timeout request while waiting for endpoint/server.")

@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/logger"
 	"github.com/Uncensored-Developer/buzz/pkg/migrate"
 	"go.uber.org/zap"
-	"log"
 )
 
 func main() {

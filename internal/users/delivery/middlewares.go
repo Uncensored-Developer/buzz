@@ -2,11 +2,12 @@ package delivery
 
 import (
 	"context"
+	"net/http"
+	"strings"
+
 	"github.com/Uncensored-Developer/buzz/internal/server/dto"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"go.uber.org/zap"
-	"net/http"
-	"strings"
 )
 
 func LoggedInUserOnlyMiddleware(

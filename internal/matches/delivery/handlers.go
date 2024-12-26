@@ -2,16 +2,17 @@ package delivery
 
 import (
 	"context"
+	"net/http"
+	"regexp"
+	"strconv"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/server/dto"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/utils"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"go.uber.org/zap"
-	"net/http"
-	"regexp"
-	"strconv"
-	"time"
 )
 
 func HandleUserSwipe(
@@ -87,7 +88,6 @@ func HandleUserSwipe(
 				logger.Error("could not encode success response",
 					zap.Error(err))
 			}
-			return
 		},
 	)
 }
@@ -97,7 +97,6 @@ func HandleFetchPotentialMatches(
 	logger *zap.Logger,
 	discService *features.DiscoverService,
 ) http.Handler {
-
 	type userResp struct {
 		Id             int64  `json:"id"`
 		Name           string `json:"name"`
@@ -136,7 +135,7 @@ func HandleFetchPotentialMatches(
 				// Check if ageRangeStr matches pattern
 				matches := re.FindStringSubmatch(ageRangeStr)
 				if matches == nil {
-					var msg = map[string]string{"age_range": "Invalid age range format"}
+					msg := map[string]string{"age_range": "Invalid age range format"}
 					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
 					return
 				}
@@ -146,7 +145,7 @@ func HandleFetchPotentialMatches(
 				end, err2 := strconv.Atoi(matches[2])
 				maxAge = end
 				if err1 != nil || err2 != nil {
-					var msg = map[string]string{"age_range": "Invalid range value"}
+					msg := map[string]string{"age_range": "Invalid range value"}
 					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
 					return
 				}
@@ -155,7 +154,7 @@ func HandleFetchPotentialMatches(
 			gender := r.URL.Query().Get("gender")
 			if gender != "" {
 				if !isValidGender(gender) {
-					var msg = map[string]string{"gender": "Invalid gender value"}
+					msg := map[string]string{"gender": "Invalid gender value"}
 					dto.SendErrorJsonResponse[map[string]string](w, logger, msg, http.StatusBadRequest)
 					return
 				}
@@ -163,7 +162,7 @@ func HandleFetchPotentialMatches(
 			}
 
 			distance := r.URL.Query().Get("distance_from")
-			radius, err := strconv.Atoi(distance)
+			radius, _ := strconv.Atoi(distance)
 			if radius == 0 {
 				radius = 50 // Set to a default of 50KM
 			}
@@ -201,7 +200,6 @@ func HandleFetchPotentialMatches(
 				logger.Error("could not encode success response",
 					zap.Error(err))
 			}
-			return
 		},
 	)
 }

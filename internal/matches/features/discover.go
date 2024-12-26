@@ -2,6 +2,8 @@ package features
 
 import (
 	"context"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
@@ -11,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/h3-go/v4"
 	"go.uber.org/zap"
-	"time"
 )
 
 type Gender string
@@ -60,7 +61,7 @@ func (d *DiscoverService) FetchPotentialMatches(ctx context.Context, userId int6
 	}
 	now := time.Now()
 
-	var opts = []repository.SelectCriteria{
+	opts := []repository.SelectCriteria{
 		data.UsersExcludingID(authUser.ID),
 	}
 	const maxAge int = 60

@@ -3,12 +3,13 @@ package data
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/repository"
 	"github.com/uber/h3-go/v4"
 	"github.com/uptrace/bun"
-	"time"
 )
 
 type IUserRepository interface {

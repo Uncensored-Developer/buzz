@@ -2,6 +2,10 @@ package cache_test
 
 import (
 	"context"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/pkg/cache"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/Uncensored-Developer/buzz/pkg/logger"
@@ -9,9 +13,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"os"
-	"testing"
-	"time"
 )
 
 type redisManagerTestSuite struct {

@@ -2,16 +2,17 @@ package delivery
 
 import (
 	"context"
+	"math/rand/v2"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/server/dto"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"github.com/brianvoe/gofakeit/v7"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"go.uber.org/zap"
-	"math/rand/v2"
-	"net/http"
-	"strings"
-	"time"
 )
 
 // HandleUserCreate handles the creation of a new user via an empty HTTP POST request.
@@ -22,7 +23,6 @@ func HandleUserCreate(
 	cfg *config.Config,
 	authService *features.AuthenticationService,
 ) http.Handler {
-
 	type userResponse struct {
 		Id       int64   `json:"id"`
 		Email    string  `json:"email"`
@@ -104,7 +104,6 @@ func HandleUserLogin(
 
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-
 			if r.Method != http.MethodPost {
 				http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 				return
@@ -144,7 +143,6 @@ func HandleUserLogin(
 				logger.Error("could not encode success response",
 					zap.Error(err))
 			}
-			return
 		},
 	)
 }

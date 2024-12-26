@@ -2,6 +2,8 @@ package features
 
 import (
 	"context"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/authentication"
@@ -10,11 +12,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/h3-go/v4"
 	"go.uber.org/zap"
-	"time"
 )
 
-var ErrEmailTaken = errors.New("Email already taken")
-var ErrInvalidLoginCred = errors.New("Email or password incorrect")
+var (
+	ErrEmailTaken       = errors.New("Email already taken")
+	ErrInvalidLoginCred = errors.New("Email or password incorrect")
+)
 
 type AuthenticationService struct {
 	hasher       hash.IStringHasher
@@ -47,8 +50,8 @@ func (a *AuthenticationService) SignUp(
 	ctx context.Context,
 	dob time.Time,
 	lat, long float64,
-	name, email, password, gender string) (models.User, error) {
-
+	name, email, password, gender string,
+) (models.User, error) {
 	_, err := a.userRepo.FindOne(ctx, data.UserWithEmail(email))
 	if err == nil {
 		return models.User{}, ErrEmailTaken

@@ -2,6 +2,9 @@ package features_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
@@ -17,15 +20,15 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/uptrace/bun"
 	"go.uber.org/zap"
-	"testing"
-	"time"
 )
 
 // Be careful not to reassign these variables
-var globalLogger *zap.Logger
-var globalConfig *config.Config
-var globalTestDatabase *testcontainer.TestDatabase
-var globalDb *bun.DB
+var (
+	globalLogger       *zap.Logger
+	globalConfig       *config.Config
+	globalTestDatabase *testcontainer.TestDatabase
+	globalDb           *bun.DB
+)
 
 // init initializes some dependencies before running the tests
 // 1. Loads the configuration using config.LoadConfig.
@@ -60,8 +63,10 @@ func init() {
 	}
 }
 
-const testUserEmail = "test_user@buzz.com"
-const testUserPassword = "password"
+const (
+	testUserEmail    = "test_user@buzz.com"
+	testUserPassword = "password"
+)
 
 type AuthenticationServiceTestSuite struct {
 	suite.Suite

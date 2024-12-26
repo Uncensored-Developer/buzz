@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/Uncensored-Developer/buzz/internal/server"
 	"os"
+
+	"github.com/Uncensored-Developer/buzz/internal/server"
 )
 
 func main() {

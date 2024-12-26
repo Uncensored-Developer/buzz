@@ -2,13 +2,14 @@ package delivery
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/server/dto"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"go.uber.org/zap"
-	"net/http"
-	"time"
 )
 
 func HandleUpdateProfileLocation(
@@ -16,7 +17,6 @@ func HandleUpdateProfileLocation(
 	logger *zap.Logger,
 	profileService *features.UserProfilesService,
 ) http.Handler {
-
 	// HTTP request type for profile update
 	type updateRequest struct {
 		Longitude float64

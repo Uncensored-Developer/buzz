@@ -2,13 +2,14 @@ package bun_mysql_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
 	"github.com/Uncensored-Developer/buzz/pkg/db"
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/uptrace/bun"
-	"testing"
 )
 
 type testUser struct {
@@ -78,5 +79,4 @@ func TestBunRepository(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, testUsers[1], user)
 	})
-
 }

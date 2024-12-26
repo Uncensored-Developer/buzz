@@ -2,12 +2,13 @@ package features
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/Uncensored-Developer/buzz/internal/test/e2e"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"net/http"
-	"testing"
 )
 
 type createUserE2eTestSuite struct {

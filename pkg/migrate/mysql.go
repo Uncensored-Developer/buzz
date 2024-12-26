@@ -3,14 +3,15 @@ package migrate
 import (
 	"database/sql"
 	"fmt"
+	"path/filepath"
+	"runtime"
+
 	"github.com/Uncensored-Developer/buzz/pkg/testcontainer"
 	"github.com/Uncensored-Developer/buzz/pkg/utils"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql" // Load driver to read migrations from the file system.
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/pkg/errors"
-	"path/filepath"
-	"runtime"
 )
 
 // Up applies all available migrations to the specified database.

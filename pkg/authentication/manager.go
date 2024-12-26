@@ -2,9 +2,10 @@ package authentication
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type ITokenManager interface {

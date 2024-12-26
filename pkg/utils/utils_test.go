@@ -1,10 +1,11 @@
 package utils_test
 
 import (
-	"github.com/Uncensored-Developer/buzz/pkg/utils"
-	"github.com/pkg/errors"
 	"math"
 	"testing"
+
+	"github.com/Uncensored-Developer/buzz/pkg/utils"
+	"github.com/pkg/errors"
 )
 
 func TestConvertDatabaseUrlToDSN(t *testing.T) {

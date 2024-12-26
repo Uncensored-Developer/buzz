@@ -54,8 +54,7 @@ services:
     networks:
       - buzz_network
 
-  api:
-    container_name: buzz
+  api_1:
     restart: always
     build:
       context: .
@@ -76,6 +75,42 @@ services:
       - BUZZ_PASSWORD_HASHER_SALT=wTkjqFUqqDpUGinAJqHZ
       - BUZZ_FAKE_USER_PASSWORD=password123
       - BUZZ_SEED_USERS=true
+    networks:
+      - buzz_network
+
+  api_2:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    depends_on:
+      - mysql_db
+      - mysql_db_go_migrate
+      - redis
+    environment:
+      - BUZZ_HTTP_HOST=0.0.0.0
+      - BUZZ_HTTP_PORT=8003
+      - BUZZ_DEBUG=true
+      - BUZZ_DATABASE_URL=mysql://user:password@mysql_db:3306/buzz
+      - BUZZ_REDIS_URL=redis://redis:6379
+      - BUZZ_JWT_KEY=wTkjqFUqqDpUGinAJqHZ
+      - BUZZ_PASSWORD_HASHER_SALT=wTkjqFUqqDpUGinAJqHZ
+      - BUZZ_FAKE_USER_PASSWORD=password123
+      - BUZZ_SEED_USERS=true
+    networks:
+      - buzz_network
+
+  load_balancer:
+    image: nginx:alpine
+    depends_on:
+      - api_1
+      - api_2
+    ports:
+      - "8007:80"
+    volumes:
+      - ./nginx/load_balancer.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - buzz_network
 

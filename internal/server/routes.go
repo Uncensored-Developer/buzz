@@ -2,13 +2,14 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	delivery2 "github.com/Uncensored-Developer/buzz/internal/matches/delivery"
 	features2 "github.com/Uncensored-Developer/buzz/internal/matches/features"
 	"github.com/Uncensored-Developer/buzz/internal/users/delivery"
 	"github.com/Uncensored-Developer/buzz/internal/users/features"
 	"github.com/Uncensored-Developer/buzz/pkg/config"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 func addRoutes(

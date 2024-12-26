@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
-	"github.com/uptrace/bun"
 	"time"
+
+	"github.com/uptrace/bun"
 )
 
 // SelectCriteria is a function type that takes a pointer to bun.SelectQuery as input and returns the modified query.

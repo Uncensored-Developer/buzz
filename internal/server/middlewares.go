@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func RequestLoggingMiddleWare(

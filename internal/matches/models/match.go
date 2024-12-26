@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/uptrace/bun"
-	"time"
 )
 
 type Match struct {

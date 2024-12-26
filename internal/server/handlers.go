@@ -1,8 +1,9 @@
 package server
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func HandleHealthCheck(logger *zap.Logger) http.Handler {

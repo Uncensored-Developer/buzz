@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"time"
+
 	"github.com/Uncensored-Developer/buzz/internal/users/data"
 	"github.com/Uncensored-Developer/buzz/internal/users/models"
 	"github.com/Uncensored-Developer/buzz/pkg/bun_mysql"
@@ -11,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/uber/h3-go/v4"
 	"go.uber.org/zap"
-	"time"
 )
 
 func PreLoadUsers(
